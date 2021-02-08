@@ -16,4 +16,4 @@ ___
 
 ## Special Thanks to
 * [`Baileys`](https://github.com/adiwajshing/Baileys)
-* [`Zhoe`](https://github.com/RynKings)
+* [`Zhoe`](https://github.com/chalyyzhu)
