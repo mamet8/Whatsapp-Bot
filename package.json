@@ -1,0 +1,22 @@
+{
+  "name": "Whatsapp-Bot",
+  "version": "1.0.0",
+  "description": "whatsapp HUJANAPI",
+  "main": "main.js",
+  "start": "node main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node main.js"
+  },
+  "author": "Mat",
+  "license": "ISC",
+  "dependencies": {
+    "@adiwajshing/baileys": "^3.4.1",
+    "fluent-ffmpeg": "^2.1.2",
+    "moment": "^2.29.1",
+    "moment-timezone": "^0.5.33",
+    "qr-image": "^3.2.0",
+    "request": "^2.88.2",
+    "utils": "^0.3.1"
+  }
+}
