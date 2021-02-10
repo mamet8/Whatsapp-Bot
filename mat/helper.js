@@ -41,15 +41,18 @@ function normalizeMention(to, txt, mention=[]){
 exports.getRandom = (ext) => {
     return `${Math.floor(Math.random() * 10000)}${ext}`
 }
-    
-//===================================================================
 
 exports.serialize = function(chat){
     m = JSON.parse(JSON.stringify(chat))
     content = m.message
     //.text = m.message.conversation 
-    m.type = Object.keys(content)[0]
     m.isGroup = m.key.remoteJid.endsWith('@g.us')
+    try{
+        const berak = Object.keys(content)[0]
+        m.type = berak
+    } catch {
+        m.type = null
+    }
     try{
         const context = m.message.extendedTextMessage.contextInfo.quotedMessage
         m.quoted = context
@@ -58,8 +61,8 @@ exports.serialize = function(chat){
     }
     
     try{
-        const mention = m.message[content]["contextInfo"]["mentionedJid"]
-        m.mentionedJid = context
+        const mention = m.message[m.type].contextInfo.mentionedJid
+        m.mentionedJid = mention
     }catch{
         m.mentionedJid = null
     }
@@ -76,8 +79,6 @@ exports.serialize = function(chat){
     m.text = txt
     return m
 }
-
-
 //download file url
 exports.downloadFile = function (uri, filename, callback) {
     request.head(uri, function (err, res, body) {
@@ -172,6 +173,14 @@ exports.sendContact = function(to, id, name){
 	const vcard = 'BEGIN:VCARD\n' + 'VERSION:3.0\n' + 'FN:' + name + '\n' + 'ORG:Kontak\n' + 'TEL;type=CELL;type=VOICE;waid=' + id.split("@s.whatsapp.net")[0] + ':+' + id.split("@s.whatsapp.net")[0] + '\n' + 'END:VCARD'
 	wa.sendMessage(to, {displayname: name, vcard: vcard}, MessageType.contact)
 }
+//send reply
+exports.sendReply = function(to, text){
+    wa.sendMessage(to, txt, MessageType.text, { quoted: ma})
+    /*const txt = normalizeMention(to, text, mids)
+    if (txt) {
+        wa.sendMessage(to, txt, MessageType.text, { quoted: m})
+    }*/
+}
 
 exports.sendMention = function(to, text, mids=[]){
     const txt = normalizeMention(to, text, mids)
@@ -237,20 +246,61 @@ exports.getGroupInvitationCode = async function(to) {
     const code = "https://chat.whatsapp.com/"+linkgc
     return code
 }
-//Jangan DiPake yg Kick masih blm bener
-exports.kickMember = async function(to, mentions=[]) {
-    const xyz = m.message.extendedTextMessage.contextInfo.mentionedJid
-    console.log(xyz)
-    const mem = []
-    for (let target in xyz){
-        wa.groupRemove(to, [target])
-        mem.push(target)
+
+exports.kickMember = async function(to, target=[]){
+    if(!target.length > 0) { return  wa.sendMessage(to, "No target..") }
+    const g = await wa.groupMetadata(to)
+    const owner = g.owner.replace("c.us","s.whatsapp.net")
+    const me = wa.user.jid
+    for (i of target){
+        if (!i.includes(me) && !i.includes(owner)){
+            const res = await wa.groupRemove(to, [i])
+            console.log(res)
+        }else{
+            wa.sendMessage(to, "NOT PREMITED")
+        }
     }
+}
+exports.promoteAdmin = async function(to, target=[]){
+    if(!target.length > 0) { return  wa.sendMessage(to, "No target..") }
+    const g = await wa.groupMetadata(to)
+    const owner = g.owner.replace("c.us","s.whatsapp.net")
+    const me = wa.user.jid
+    for (i of target){
+        if (!i.includes(me) && !i.includes(owner)){
+            const res = await wa.groupMakeAdmin(to, [i])
+            console.log(res)
+        }else{
+            wa.sendMessage(to, "NOT PREMITED")
+        }
+    }
+}
+exports.demoteAdmin = async function(to, target=[]){
+    if(!target.length > 0) { return  wa.sendMessage(to, "No target..") }
+    const g = await wa.groupMetadata(to)
+    const owner = g.owner.replace("c.us","s.whatsapp.net")
+    const me = wa.user.jid
+    for (i of target){
+        if (!i.includes(me) && !i.includes(owner)){
+            const res = await wa.groupDemoteAdmin(to, [i])
+            console.log(res)
+        }else{
+            wa.sendMessage(to, "NOT PREMITED")
+        }
+    }
+}
+exports.leaveGroup = function(to){
+    res = wa.groupLeave(to)
+    return res
 }
 
 exports.getContact = function(idx) {
-    const r = JSON.parse(JSON.stringify(wa.contacts[idx]))
-    return r
+    try {
+        const r = JSON.parse(JSON.stringify(wa.contacts[idx]))
+        return r
+    } catch (e) {
+        console.log('Error : '+ e)
+    }
 }
 exports.getBio = async function(mids) {
     const pdata = await wa.getStatus(mids)
@@ -292,6 +342,37 @@ exports.fakeReply = async function(to, target, text, prevtext, mention=[], msgId
 exports.fakeReply2 = async function(to, target, text, prevtext, mention=[], msgId="B826873620DD5947E683E3ABE663F263"){
     mention = m.message.extendedTextMessage.contextInfo.mentionedJid[0]
     wa.sendMessage(to, text, MessageType.text, {
-        contextInfo: {"mentionedJid": mention, "stanzaId": msgId,"participant": target,"quotedMessage": {"conversation": prevtext}}
+        contextInfo: {"mentionedJid": mention, "stanzaId": msgId, "participant": target,"quotedMessage": {"conversation": prevtext}}
     })
+}
+
+exports.setName = async function(query){
+    const response = await wa.updateProfileName(query)
+    return response
+}
+exports.setBio = async function(query){
+    const response = await wa.setStatus(query)
+    return response
+}
+
+exports.sendReply = function(to, text, mids=[]){
+    if(mids.length > 0){
+        text = normalizeMention(to, text, mids)
+    }
+    if (m.isGroup){
+        m.sender = m.participant
+    }else{
+        m.sender = m.key.remoteJid
+    }
+    ini = m.key.id
+    wa.sendMessage(to, text, MessageType.extendedText, { contextInfo: {"mentionedJid": mids,"stanzaId": ini, "participant": m.sender, "quotedMessage": { "conversation": text}} })
+}
+
+exports.sendReplyWA = function(to, text, prevtext, mids=[]){
+    if(mids.length > 0){
+        text = normalizeMention(to, text, mids)
+    }
+    waid = "0@s.whatsapp.net"
+    ini = m.key.id
+    wa.sendMessage(to, text, MessageType.extendedText, { contextInfo: {"mentionedJid": mids,"stanzaId": ini, "participant": waid, "quotedMessage": { "conversation": prevtext}} })
 }
