@@ -14,6 +14,8 @@ const speed = require('performance-now')
 conn.connectToWhatsApp()
 const event = conn.Whatsapp
 
+const stickuy = JSON.parse(fs.readFileSync('./mat/data/sticker.json'))
+
 const APIKUY = "Chat me for Apikey https://wa.me/6281396061030"
 var tmp_ids = []
 var respon_tag = {}
@@ -127,8 +129,8 @@ event.on('message-new', async(chat) =>{
                 wa.sendMessage(to, ret.result)
                 fs.unlinkSync(file)
             }
-        } else if (text == "toimg"){
-            if (Object.keys(msg.quoted)[0] === "stickerMessage") {
+        } else if (Object.keys(msg.quoted)[0] === "stickerMessage"){
+            if (text == "toimg") {
                 msg.message = msg.quoted
                 gerak = msg.quoted.stickerMessage.firstFrameSidecar
                 const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
@@ -140,6 +142,16 @@ event.on('message-new', async(chat) =>{
                     wa.sendImage(to, mat)
                     fs.unlinkSync(mat)
                 })
+            } else if (text == "tomp4") {
+                msg.message = msg.quoted
+                const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
+                const stream = fs.createReadStream(file);
+                const form = new FormData();
+                form.append('webp', stream);
+                const res = await requests('http://hujanapi.xyz/api/webp2mp4?apikey='+APIKUY, { method: 'POST', body: form })
+                const ret =  await res.json()
+                wa.sendMediaURL(to, ret.result)
+                fs.unlinkSync(file)
             }
         } else if (text == "sticker"){
             if (Object.keys(msg.quoted)[0] === "imageMessage") {
@@ -242,72 +254,73 @@ event.on('message-new', async(chat) =>{
             mat += '2. @!\n'
             mat += 'Github: https://github.com/mamet8/Whatsapp-Bot\n\n'
             mat += '_Command:_ *NO PREFIX*\n'
-            mat += '> Hi\n'
-            mat += '> Owner\n'
-            mat += '> Me\n'
-            mat += '> Speed\n'
-            mat += '> Settings\n'
-            mat += '> Groupinfo\n'
-            mat += '> Grouplist\n'
-            mat += '> Tagall\n'
-            mat += '> Grouplink\n'
-            mat += '> Admingroup\n'
-            mat += '> Ownergroup\n'
-            mat += '> Fakereply <msg you>|<msg target>|<@>\n'
-            mat += '> Hidetag\n'
-            mat += '> Getpict <@>\n'
-            mat += '> Getbio <@>\n'
-            mat += '> Respontag\n'
-            mat += '> Welcome\n'
-            mat += '> Leave\n'
+            mat += '⤷ Hi\n'
+            mat += '⤷ Owner\n'
+            mat += '⤷ Me\n'
+            mat += '⤷ Speed\n'
+            mat += '⤷ Settings\n'
+            mat += '⤷ grouplist\n'
+            mat += '⤷ Tagall\n'
+            mat += '⤷ Grouplink\n'
+            mat += '⤷ Admingroup\n'
+            mat += '⤷ Ownergroup\n'
+            mat += '⤷ Fakereply <msg you>|<msg target>|<@>\n'
+            mat += '⤷ Hidetag\n'
+            mat += '⤷ Getpict <@>\n'
+            mat += '⤷ Getbio <@>\n'
+            mat += '⤷ Respontag\n'
+            mat += '⤷ Welcome\n'
+            mat += '⤷ Leave\n'
             mat += '\n'
             mat += '\n*Media:*\n'
-            mat += '> Ig\n'
-            mat += '> Youtube\n'
-            mat += '> Dobgin <text>\n'
-            mat += '> Nekobin <text>\n'
-            mat += '> Nickff <id>\n'
-            mat += '> Nickml <id>|<serverid>\n'
-            mat += '> Nickcodm <id>\n'
-            mat += '> Ceklistrik <nopelanggan>\n'
-            mat += '> Cektelkom <nopelanggan>\n'
-            mat += '> Sscode <text>\n'
-            mat += '> Herolistml\n'
-            mat += '> Heroml <hero>\n'
-            mat += '> Charsgenshin\n'
-            mat += '> Chargi <hero>\n'
-            mat += '> Urlshortener1 <url>\n'
-            mat += '> Urlshortener2 <url>\n'
-            mat += '> Ssweb <url>\n'
-            mat += '> Zippydl <url>\n'
-            mat += '> Solidfilesdl <url>\n'
-            mat += '> Mediafiredl <url>\n'
-            mat += '> Fancytext <text>\n'
-            mat += '> Cersex\n'
-            mat += '> Quotes\n'
-            mat += '> Quoteid\n'
-            mat += '> Quotesanime\n'
-            mat += '> Randomcat\n'
-            mat += '> Randomloli\n'
-            mat += '> Randomblowjob\n'
-            mat += '> Randomhentai\n'
-            mat += '> Randomkiss\n'
-            mat += '> Randomhug\n'
-            mat += '> Randomcry\n'
-            mat += '> Randomanime\n'
-            mat += '> Randomwaifu\n'
-            mat += '> Shopee <text>\n'
-            mat += '> Xvideos <text>\n'
-            mat += '> Xnxx <text>\n'
-            mat += '> FFlogo <text>|<hero>\n'
-            mat += '> MLlogo <text>|<hero>\n'
-            mat += '> Listhero mllogo\n'
-            mat += '> Listhero fflogo\n'
+            mat += '⤷ Ig\n'
+            mat += '⤷ Youtube\n'
+            mat += '⤷ Apkpure\n'
+            mat += '⤷ Dobgin <text>\n'
+            mat += '⤷ Nekobin <text>\n'
+            mat += '⤷ Nickff <id>\n'
+            mat += '⤷ Nickml <id>|<serverid>\n'
+            mat += '⤷ Nickcodm <id>\n'
+            mat += '⤷ Ceklistrik <nopelanggan>\n'
+            mat += '⤷ Cektelkom <nopelanggan>\n'
+            mat += '⤷ Sscode <text>\n'
+            mat += '⤷ Herolistml\n'
+            mat += '⤷ Heroml <hero>\n'
+            mat += '⤷ Charsgenshin\n'
+            mat += '⤷ Chargi <hero>\n'
+            mat += '⤷ Urlshortener1 <url>\n'
+            mat += '⤷ Urlshortener2 <url>\n'
+            mat += '⤷ Ssweb <url>\n'
+            mat += '⤷ Zippydl <url>\n'
+            mat += '⤷ Solidfilesdl <url>\n'
+            mat += '⤷ Mediafiredl <url>\n'
+            mat += '⤷ Fancytext <text>\n'
+            mat += '⤷ Cersex\n'
+            mat += '⤷ Quotes\n'
+            mat += '⤷ Quoteid\n'
+            mat += '⤷ Quotesanime\n'
+            mat += '⤷ Randomcat\n'
+            mat += '⤷ Randomloli\n'
+            mat += '⤷ Randomblowjob\n'
+            mat += '⤷ Randomhentai\n'
+            mat += '⤷ Randomkiss\n'
+            mat += '⤷ Randomhug\n'
+            mat += '⤷ Randomcry\n'
+            mat += '⤷ Randomanime\n'
+            mat += '⤷ Randomwaifu\n'
+            mat += '⤷ Shopee <text>\n'
+            mat += '⤷ Xvideos <text>\n'
+            mat += '⤷ Xnxx <text>\n'
+            mat += '⤷ FFlogo <text>|<hero>\n'
+            mat += '⤷ MLlogo <text>|<hero>\n'
+            mat += '⤷ Listhero mllogo\n'
+            mat += '⤷ Listhero fflogo\n'
             mat += '\n*Reply Command:*\n'
-            mat += '> Img2url\n'
-            mat += '> Totext\n'
-            mat += '> To sscode'
-            mat += '> Toimg'
+            mat += '⤷ Img2url\n'
+            mat += '⤷ Totext\n'
+            mat += '⤷ To sscode\n'
+            mat += '⤷ Toimg\n'
+            mat += '⤷ Tomp4'
             wa.sendMention(to, mat, [cr1,cr2])
         } else if (cmd === "speed"){
             if (!modecmd(sender)) return
@@ -470,6 +483,28 @@ event.on('message-new', async(chat) =>{
             }
 
 //============[ Media ]============\\
+        } else if (cmd.startsWith("pinterest")) {
+            if (!modecmd(sender)) return
+            const xtext = cmd.replace('pinterest' + " ", "")
+            const response = await requests("http://hujanapi.xyz/api/pinterest?query="+xtext+"&apikey="+APIKUY)
+            const mat = await response.json()
+            const data = mat.result.data
+            let kya = data[Math.floor(Math.random() * data.length)]
+            wa.sendMediaURL(to, kya)
+        } else if (cmd.startsWith("jadwalshalat")) {
+            if (!modecmd(sender)) return
+            const xtext = cmd.replace('jadwalshalat' + " ", "")
+            const response = await requests("http://hujanapi.xyz/api/jadwalsholat?query="+xtext+"&apikey="+APIKUY)
+            const mat = await response.json()
+            let fox = "*Jadwal Shalat "+xtext+"*\n"
+            for (let i of mat.result) {
+                fox += "\nSubuh: "+i.Subuh
+                fox += "\nDzuhur: "+i.Dzuhur
+                fox += "\nAshar: "+i.Ashar
+                fox += "\nMaghrib: "+i.Maghrib
+                fox += "\nIsya: "+i.Isya
+            }
+            wa.sendReply(to, fox)
         } else if (txt.startsWith("stickerline")) {
             if (!modecmd(sender)) return
             const xtext = txt.replace('stickerline' + " ", "")
@@ -983,10 +1018,9 @@ event.on('message-new', async(chat) =>{
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
 
-        } else if (txt.startsWith("youtube")) {
-            const xtext = txt.replace("youtube" + " ", "")
+        } else if (cmd.startsWith("youtube")) {
+            const xtext = text.replace("youtube" + " ", "")
             cond = xtext.split(" ")
-            g = await wa.getGroup(to)
             let res = "╭───「 Youtube 」"
             res += "\n├ Usage : "
             res += "\n│ • Youtube"
@@ -1028,10 +1062,46 @@ event.on('message-new', async(chat) =>{
                 wa.sendMediaURL(to, data.result.image, yt)
                 wa.sendMediaURL(to, data.result.mp4)
             }
-        } else if (txt.startsWith("ig")) {
-            const xtext = txt.replace("ig" + " ", "")
+
+        } else if (cmd.startsWith("apkpure")) {
+            if (!modecmd(sender)) return
+            const xtext = text.replace("apkpure" + " ", "")
             cond = xtext.split(" ")
-            g = await wa.getGroup(to)
+            let res = "╭───「 Apkpure 」"
+            res += "\n├ Usage : "
+            res += "\n│ • Apkpure"
+            res += "\n│ • Apkpure Search <query>"
+            res += "\n│ • Apkpure Download <URL>"
+            res += "\n╰───「 Hello World 」"
+            if (cmd == "apkpure") { 
+                wa.sendMessage(to, res)
+            } else if (cond[0] == "search") {
+                xyz = cond[1].split(" ")
+                const response = await requests("http://hujanapi.xyz/api/apkpure?query="+xyz+"&apikey="+APIKUY)
+                const mat = await response.json()
+                let no = 0
+                let fox = "*Apkpure Search*\n"
+                if (pemisah.length == 1)  {
+                    for (let i of mat.result.data) {
+                        no += 1
+                        fox += "\n\n"+no+". "+i.title+"\n"+i.link
+                    }
+                    wa.sendReply(to, fox)
+                }
+            } else if (cond[0] == "download") {
+                const response = await requests("http://hujanapi.xyz/api/apkpuredl?url="+xtext+"&apikey="+APIKUY)
+                const mat = await response.json()
+                let xyz = "*Apkpure Download*\n"
+                xyz = "\n*Title:* "+mat.result.title
+                xyz = "\n*Desc:* "+mat.result.desc
+                xyz = "\n*Size:* "+mat.result.size
+                xyz = "\n*Url:* \n"+mat.result.url
+                wa.sendReply(to, xyz)
+            }
+
+        } else if (cmd.startsWith("ig")) {
+            const xtext = text.replace("ig" + " ", "")
+            cond = xtext.split(" ")
             let res = "╭───「 Instagram 」"
             res += "\n├ Usage : "
             res += "\n│ • Ig"
