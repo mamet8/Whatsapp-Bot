@@ -75,7 +75,7 @@ exports.serialize = function(chat){
     if (m.key.fromMe){
         m.sender = wa.user.jid
     }
-    txt = (m.type === 'conversation' && m.message.conversation) ? m.message.conversation : (m.type == 'imageMessage') && m.message.imageMessage.caption ? m.message.imageMessage.caption : (m.type == 'videoMessage') && m.message.videoMessage.caption ? m.message.videoMessage.caption : (m.type == 'extendedTextMessage') && m.message.extendedTextMessage.text ? m.message.extendedTextMessage.text : ""
+    txt = (m.type === 'conversation' && m.message.conversation) ? m.message.conversation : (m.type == 'imageMessage') && m.message.imageMessage.caption ? m.message.imageMessage.caption : (m.type == 'documentMessage') && m.message.documentMessage.caption ? m.message.documentMessage.caption : (m.type == 'videoMessage') && m.message.videoMessage.caption ? m.message.videoMessage.caption : (m.type == 'extendedTextMessage') && m.message.extendedTextMessage.text ? m.message.extendedTextMessage.text : ""
     m.text = txt
     return m
 }
@@ -101,6 +101,12 @@ exports.sendImage = function(to, filename, text=""){
 exports.sendAudio = function(to, filename, text=""){
 	const bufer = fs.readFileSync(filename)
 	wa.sendMessage(to, bufer, MessageType.mp4Audio, { mimetype: Mimetype.mp4Audio, ptt: true})
+}
+
+//send Pdf
+exports.sendPdf = function(to, filename){
+    const bufer = fs.readFileSync(filename)
+    wa.sendMessage(to, bufer, MessageType.document, { mimetype: Mimetype.pdf})
 }
 
 //send Video
