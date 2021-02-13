@@ -750,7 +750,7 @@ event.on('message-new', async(chat) =>{
             for (let i of asu.type) {
                 tipe += i+", "
             }
-            let fox = "*Detail Pokemon*\n"
+            let fox = "*Random Pokemon*\n"
             fox += "\n*Title :* " + asu.name
             fox += "\n*Desc :* "+asu.desc
             fox += "\n*Info :*"
