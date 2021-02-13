@@ -14,8 +14,6 @@ const speed = require('performance-now')
 conn.connectToWhatsApp()
 const event = conn.Whatsapp
 
-const stickuy = JSON.parse(fs.readFileSync('./mat/data/sticker.json'))
-
 const APIKUY = "Chat me for Apikey https://wa.me/6281396061030"
 var tmp_ids = []
 var respon_tag = {}
@@ -69,7 +67,7 @@ event.on('message-new', async(chat) =>{
     console.log("NEW MESSAGE")
     const msg = wa.serialize(chat)
     const text = msg.text
-    const cmd = msg.text.toLowerCase()
+    const cmd = text.toLowerCase()
     const sender = msg.sender
     const to = msg.key.remoteJid
     const msg_id = msg.key.id
@@ -295,6 +293,15 @@ event.on('message-new', async(chat) =>{
             mat += '⤷ Solidfilesdl <url>\n'
             mat += '⤷ Mediafiredl <url>\n'
             mat += '⤷ Fancytext <text>\n'
+            mat += '⤷ Topnews\n'
+            mat += '⤷ Lirik <text>\n'
+            mat += '⤷ Chord <text>\n'
+            mat += '⤷ Wikipedia <text>\n'
+            mat += '⤷ Gsmarena <text>\n'
+            mat += '⤷ Ssweb <url>\n'
+            mat += '⤷ Artinama <nama>\n'
+            mat += '⤷ Artimimpi <text>\n'
+            mat += '⤷ Ramalanjodoh <nama1>|<nama2>\n'
             mat += '⤷ Cersex\n'
             mat += '⤷ Quotes\n'
             mat += '⤷ Quoteid\n'
@@ -310,7 +317,9 @@ event.on('message-new', async(chat) =>{
             mat += '⤷ Randomwaifu\n'
             mat += '⤷ Shopee <text>\n'
             mat += '⤷ Xvideos <text>\n'
+            mat += '⤷ Xvideosdl <url>\n'
             mat += '⤷ Xnxx <text>\n'
+            mat += '⤷ Xnxxdl <url>\n'
             mat += '⤷ FFlogo <text>|<hero>\n'
             mat += '⤷ MLlogo <text>|<hero>\n'
             mat += '⤷ Listhero mllogo\n'
@@ -677,7 +686,7 @@ event.on('message-new', async(chat) =>{
             const xtext = cmd.replace('lirik' + " ", "")
             const response = await requests("http://hujanapi.xyz/api/lirik?query="+xtext+"&apikey="+APIKUY)
             const data = await response.json()
-            wa.sendMessage(to, data.result.lyric)
+            wa.sendReplyWA(to, data.lyric, "*Lirik Lagu "+data.title+"*")
         } else if (cmd.startsWith("chord")) {
             if (!modecmd(sender)) return
             const xtext = cmd.replace('chord' + " ", "")
@@ -793,9 +802,9 @@ event.on('message-new', async(chat) =>{
                 fox += "\n" + no + ". " + asu[a]
             }
             wa.sendMessage(to, fox)
-        } else if (cmd.startsWith("shopee")) {
+        } else if (cmd.startsWith("shopee ")) {
             if (!modecmd(sender)) return
-            const xtext = cmd.replace('shopee' + " ", "")
+            const xtext = cmd.replace("shopee ", "")
             pemisah = xtext.split("|")
             const response = await requests("http://hujanapi.xyz/api/shopee?query="+xtext+"&count=10&apikey="+APIKUY)
             const datas = await response.json()
@@ -824,12 +833,25 @@ event.on('message-new', async(chat) =>{
                 fox += "\n\n\nSource : " + datas.result.source
                 wa.sendMediaURL(to, asu[value].image_cover, fox)
             }
-        } else if (cmd.startsWith("xvideos")) {
+        } else if (cmd.startsWith("topnews")) {
+            if (!modecmd(sender)) return
+            pemisah = cmd.split(" ")
+            const response = await requests("http://hujanapi.xyz/api/topnews?apikey="+APIKUY)
+            const mat = await response.json()
+            let num = 0
+            let fox = "*Topnews*\n\n"
+            for (let i of mat.result) {
+                num += 1
+                fox += num+". Title: "+i.title+"\n "+i.url+"\n\n"
+                //fox += num+". Title: "+i.title+"\nDesc: "+i.description+"\nPublishedAt: "+i.publishedAt+"\nSource: "+i.source.name+"\nURL:"+i.url+"\n\n"
+            }
+            wa.sendReply(to, fox)
+        } else if (cmd.startsWith("xvideos ")) {
             if (!modecmd(sender)) return
             const xtext = cmd.replace("xvideos ", "")
             pemisah = xtext.split("|")
             const search = pemisah[0]
-            const response = await requests("http://hujanapi.xyz/api/xvideos?query="+search+"&count=10&apikey="+APIKUY)
+            const response = await requests("http://hujanapi.xyz/api/xvideos?query="+search+"&apikey="+APIKUY)
             const datas = await response.json()
             const img = 'https://seeklogo.com/images/X/xvideos-logo-77E7B4F168-seeklogo.com.png'
             const asu = datas.result
@@ -838,7 +860,7 @@ event.on('message-new', async(chat) =>{
                 let fox = "*_Xvideos Search_*\n\n"
                 for (var a = 0; a < asu.length; a++) {
                     num += 1
-                    fox += "```"+asu[a].title+"```\n"+asu[a].url+"```("+num+")```\n"
+                    fox += "```"+asu[a].title+"```\n"+asu[a].url+" ```("+num+")```\n"
                 }
                 fox += "\n\n*Hey* @! *For detail*:\n```xvideos "+xtext+"|number```"
                 wa.sendMediaURL(to, img, fox, [sender])
@@ -854,11 +876,11 @@ event.on('message-new', async(chat) =>{
                 fox += "\n\n\nSource : xvideos.com"
                 wa.sendMediaURL(to, asu[value].image, fox)
             }
-        } else if (cmd.startsWith("xnxx")) {
+        } else if (cmd.startsWith("xnxx ")) {
             if (!modecmd(sender)) return
-            const xtext = cmd.replace('xnxx' + " ", "")
+            const xtext = cmd.replace("xnxx ", "")
             pemisah = xtext.split("|")
-            const response = await requests("http://hujanapi.xyz/api/xnxx?query="+xtext+"&count=10&apikey="+APIKUY)
+            const response = await requests("http://hujanapi.xyz/api/xnxx?query="+xtext+"&apikey="+APIKUY)
             const datas = await response.json()
             const img = 'https://yt3.ggpht.com/ytc/AAUvwngpbURJyno0rvS4aza889YDF7-oXbRyopWO0bZO=s900-c-k-c0x00ffffff-no-rj'
             const asu = datas.result
@@ -883,6 +905,30 @@ event.on('message-new', async(chat) =>{
                 fox += "\n\n\nSource : xnxx.com"
                 wa.sendMediaURL(to, asu[value].image, fox)
             }
+        } else if (cmd.startsWith("xnxxdl ")) {
+            if (!modecmd(sender)) return
+            const xtext = cmd.replace("xnxxdl ", "")
+            const response = await requests("http://hujanapi.xyz/api/xnxxdl?url="+xtext+"&apikey="+APIKUY)
+            const asu = await response.json()
+            if (Number(asu.size.split(' MB')[0]) > 40.00) return wa.sendReply(to, 'Error Send Video\ncause size file is big')
+            let crot = "*Xnxx Download*\n\n"
+            crot += "*Title*: "+asu.judul
+            crot += "\n*Size*: "+asu.size
+            crot += "\n*Url*\n"+asu.vid
+            wa.sendReply(to, "Silahkan tunggu sebentar proses pengiriman file membutuhkan waktu beberapa menit.")
+            wa.sendMediaURL(to, asu.vid, crot)
+        } else if (cmd.startsWith("xvideosdl ")) {
+            if (!modecmd(sender)) return
+            const xtext = cmd.replace("xvideosdl ", "")
+            const response = await requests("http://hujanapi.xyz/api/xvideosdl?url="+xtext+"&apikey="+APIKUY)
+            const asu = await response.json()
+            if (Number(asu.size.split(' MB')[0]) > 40.00) return wa.sendReply(to, 'Error Send Video\ncause size file is big')
+            let crot = "*Xnxx Download*\n\n"
+            crot += "*Title*: "+asu.judul
+            crot += "\n*Size*: "+asu.size
+            crot += "\n*Url*\n"+asu.vid
+            wa.sendReply(to, "Silahkan tunggu sebentar proses pengiriman file membutuhkan waktu beberapa menit.")
+            wa.sendMediaURL(to, asu.vid, crot)
         } else if (cmd.startsWith("cersex")) {
             if (!modecmd(sender)) return
             const xtext = cmd.replace('cersex' + " ", "")
@@ -963,55 +1009,65 @@ event.on('message-new', async(chat) =>{
             }
             wa.sendReply(to, fox)
         } else if (txt.startsWith("wetglass")) {
+            if (!modecmd(sender)) return
             const xtext = txt.replace('wetglass' + " ", "")
             const response = await requests("http://hujanapi.xyz/api/wetglass?text="+xtext+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
         } else if (txt.startsWith("thunder")) {
+            if (!modecmd(sender)) return
             const xtext = txt.replace('thunder' + " ", "")
             const response = await requests("http://hujanapi.xyz/api/thunder?text="+xtext+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
         } else if (txt.startsWith("blackpink")) {
+            if (!modecmd(sender)) return
             const xtext = txt.replace('blackpink' + " ", "")
             const response = await requests("http://hujanapi.xyz/api/blackpink?text="+xtext+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
         } else if (txt.startsWith("skyonline")) {
+            if (!modecmd(sender)) return
             const xtext = txt.replace('skyonline' + " ", "")
             const response = await requests("http://hujanapi.xyz/api/skyonline?text="+xtext+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
         } else if (txt.startsWith("greenneon")) {
+            if (!modecmd(sender)) return
             const xtext = txt.replace('greenneon' + " ", "")
             const response = await requests("http://hujanapi.xyz/api/greenneon?text="+xtext+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
         } else if (txt.startsWith("glitchtext")) {
+            if (!modecmd(sender)) return
             const xtext = txt.replace('glitchtext' + " ", "")
             pemisah = xtext.split("|")
             const response = await requests("http://hujanapi.xyz/api/glitch_text?text1="+pemisah[0]+"&text2="+pemisah[1]+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
         } else if (txt.startsWith("marvelavengers")) {
+            if (!modecmd(sender)) return
             const xtext = txt.replace('marvelavengers' + " ", "")
             pemisah = xtext.split("|")
             const response = await requests("http://hujanapi.xyz/api/marvelavengers?text1="+pemisah[0]+"&text2="+pemisah[1]+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
         } else if (txt.startsWith("marvelstudio")) {
+            if (!modecmd(sender)) return
             const xtext = txt.replace('marvelstudio' + " ", "")
             pemisah = xtext.split("|")
             const response = await requests("http://hujanapi.xyz/api/marvelstudio?text1="+pemisah[0]+"&text2="+pemisah[1]+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
         } else if (txt.startsWith("wolfblack")) {
+            if (!modecmd(sender)) return
             const xtext = txt.replace('wolfblack' + " ", "")
             pemisah = xtext.split("|")
             const response = await requests("http://hujanapi.xyz/api/wolf_black?text1="+pemisah[0]+"&text2="+pemisah[1]+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
         } else if (txt.startsWith("pornhub")) {
+            if (!modecmd(sender)) return
             const xtext = txt.replace('pornhub' + " ", "")
             pemisah = xtext.split("|")
             const response = await requests("http://hujanapi.xyz/api/pornhub?text1="+pemisah[0]+"&text2="+pemisah[1]+"&apikey="+APIKUY)
@@ -1019,7 +1075,9 @@ event.on('message-new', async(chat) =>{
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
 
         } else if (cmd.startsWith("youtube")) {
-            const xtext = text.replace("youtube" + " ", "")
+            if (!modecmd(sender)) return
+            var sep = text.split(' ')
+            const xtext = text.replace(sep[0] + " ", "")
             cond = xtext.split(" ")
             let res = "╭───「 Youtube 」"
             res += "\n├ Usage : "
@@ -1028,9 +1086,9 @@ event.on('message-new', async(chat) =>{
             res += "\n│ • Youtube Mp3 <URL>"
             res += "\n│ • Youtube Mp4 <url>"
             res += "\n╰───「 Hello World 」"
-            if (xtext == "youtube") { 
+            if (cmd == "youtube") { 
                 wa.sendMessage(to, res)
-            } else if (cond[0] == "search") {
+            } else if (cond[0].toLowerCase() == "search") {
                 const response = await requests("http://hujanapi.xyz/api/ytsearch?query="+cond[1]+"&apikey="+APIKUY)
                 const data = await response.json()
                 const asu = data.result
@@ -1041,7 +1099,7 @@ event.on('message-new', async(chat) =>{
                     fox += "\n"+asu[a].title+"\n"+asu[a].url+" ("+no+")"
                 }
                 wa.sendMessage(to, fox)
-            } else if (cond[0] == "mp3") {
+            } else if (cond[0].toLowerCase() == "mp3") {
                 const response = await requests("http://hujanapi.xyz/api/ytdl?url="+cond[1]+"&apikey="+APIKUY)
                 const data = await response.json()
                 let yt = "*Youtube MP3*\n\n"
@@ -1051,7 +1109,7 @@ event.on('message-new', async(chat) =>{
                 yt += "\nsize_audio: _"+data.result.size_audio+"_"
                 wa.sendMediaURL(to, data.result.image, yt)
                 wa.sendMediaURL(to, data.result.mp3)
-            } else if (cond[0] == "mp4") {
+            } else if (cond[0].toLowerCase() == "mp4") {
                 const response = await requests("http://hujanapi.xyz/api/ytdl?url="+cond[1]+"&apikey="+APIKUY)
                 const data = await response.json()
                 let yt = "*Youtube MP3*\n\n"
@@ -1065,7 +1123,8 @@ event.on('message-new', async(chat) =>{
 
         } else if (cmd.startsWith("apkpure")) {
             if (!modecmd(sender)) return
-            const xtext = text.replace("apkpure" + " ", "")
+            var sep = text.split(' ')
+            const xtext = text.replace(sep[0] + " ", "")
             cond = xtext.split(" ")
             let res = "╭───「 Apkpure 」"
             res += "\n├ Usage : "
@@ -1075,7 +1134,7 @@ event.on('message-new', async(chat) =>{
             res += "\n╰───「 Hello World 」"
             if (cmd == "apkpure") { 
                 wa.sendMessage(to, res)
-            } else if (cond[0] == "search") {
+            } else if (cond[0].toLowerCase() == "search") {
                 xyz = cond[1].split(" ")
                 const response = await requests("http://hujanapi.xyz/api/apkpure?query="+xyz+"&apikey="+APIKUY)
                 const mat = await response.json()
@@ -1088,7 +1147,7 @@ event.on('message-new', async(chat) =>{
                     }
                     wa.sendReply(to, fox)
                 }
-            } else if (cond[0] == "download") {
+            } else if (cond[0].toLowerCase() == "download") {
                 const response = await requests("http://hujanapi.xyz/api/apkpuredl?url="+xtext+"&apikey="+APIKUY)
                 const mat = await response.json()
                 let xyz = "*Apkpure Download*\n"
@@ -1100,7 +1159,9 @@ event.on('message-new', async(chat) =>{
             }
 
         } else if (cmd.startsWith("ig")) {
-            const xtext = text.replace("ig" + " ", "")
+            if (!modecmd(sender)) return
+            var sep = text.split(' ')
+            const xtext = text.replace(sep[0] + " ", "")
             cond = xtext.split(" ")
             let res = "╭───「 Instagram 」"
             res += "\n├ Usage : "
@@ -1109,11 +1170,10 @@ event.on('message-new', async(chat) =>{
             res += "\n│ • Ig Post <URL>"
             res += "\n│ • Ig Story <username> <count>"
             res += "\n╰───「 Hello World 」"
-            if (xtext == "ig") { 
+            if (cmd == "ig") { 
                 wa.sendMessage(to, res)
-            } else if (cond[0] == "profile") {
-                xyz = cond[1].split(" ")
-                const response = await requests("http://hujanapi.xyz/api/ig?username="+xyz+"&apikey="+APIKUY)
+            } else if (cond[0].toLowerCase() == "profile") {
+                const response = await requests("http://hujanapi.xyz/api/ig?username="+cond[1]+"&apikey="+APIKUY)
                 const data = await response.json()
                 let ig = "  ｢Instagram Profile｣\n"
                 ig += "\n• Username : "+data.result.user.username
@@ -1126,7 +1186,7 @@ event.on('message-new', async(chat) =>{
                 ig += "\n• Link : https://www.instagram.com/"+xyz
                 photo = data.result.user.hd_profile_pic_url_info.url
                 wa.sendMediaURL(to, data.result.user.hd_profile_pic_url_info.url, ig)
-            } else if (cond[0] == "post"){
+            } else if (cond[0].toLowerCase() == "post"){
                 const response = await requests("http://hujanapi.xyz/api/igpost?url="+cond[1]+"&apikey="+APIKUY)
                 const data = await response.json()
                 const media = data.result.media
@@ -1137,7 +1197,7 @@ event.on('message-new', async(chat) =>{
                         wa.sendMediaURL(to, media[a].image)
                     }
                 }
-            } else if (cond[0] == "story"){
+            } else if (cond[0].toLowerCase() == "story"){
                 xyz = cond[2].split(" ")
                 const response = await requests("http://hujanapi.xyz/api/igstory?username="+cond[1]+"&apikey="+APIKUY)
                 const data = await response.json()
@@ -1156,10 +1216,17 @@ event.on('message-new', async(chat) =>{
                         wa.sendReply(to, 'Hanya ada '+data.length+' Story instagram') 
                     }
                 }
+            } else if (cond[0].toLowerCase() == "tv"){
+                const response = await requests("http://hujanapi.xyz/api/igtv?url="+cond[1]+"&apikey="+APIKUY)
+                const data = await response.json()
+                const mat = data.result.media[0]
+                wa.sendMediaURL(to, mat.video_url)
             }
 
         } else if (cmd.startsWith("respontag")) {
-            const xtext = cmd.replace("respontag" + " ", "")
+            if (!modecmd(sender)) return
+            var sep = text.split(' ')
+            const xtext = text.replace(sep[0] + " ", "")
             cond = xtext.split(" ")
             g = await wa.getGroup(to)
             let res = "╭───「 Auto Respon Tag 」"
@@ -1170,9 +1237,9 @@ event.on('message-new', async(chat) =>{
             res += "\n│ • Respontag <on/off>"
             res += "\n│ • Respontag <message>"
             res += "\n╰───「 Hello World 」"
-            if (xtext == "respontag") { 
+            if (cmd == "respontag") { 
                 wa.sendMessage(to, res)
-            } else if (cond[0] == "on") {
+            } else if (cond[0].toLowerCase() == "on") {
                 if (wait.responder.tag.status){
                     wait.responder.tag.GROUP.push(to)
                     wait.responder.tag.message[to] = "ada apa?"
@@ -1183,7 +1250,7 @@ event.on('message-new', async(chat) =>{
                     wait.responder.tag.message[to] = "ada apa?"
                     wa.sendMessage(to, `Success activated Auto Respon Tag *${g.subject}*`)
                 }
-            } else if (cond[0] == "off") {
+            } else if (cond[0].toLowerCase() == "off") {
                 if (wait.responder.tag.status){
                     wait.responder.tag.GROUP.splice(to)
                     wa.sendMessage(to, "Auto Respon Tag already deactive *"+g.subject+"*")
@@ -1197,7 +1264,9 @@ event.on('message-new', async(chat) =>{
                 wa.sendMessage(to, ' 「 Auto Respon 」\nAuto Respon Tag has been set to:\n_'+wait.responder.tag.message[to]+'_ \nTo: *'+g.subject+'*')
             }
         } else if (cmd.startsWith("welcome")) {
-            const xtext = cmd.replace("welcome" + " ", "")
+            if (!modecmd(sender)) return
+            var sep = text.split(' ')
+            const xtext = text.replace(sep[0] + " ", "")
             cond = xtext.split(" ")
             g = await wa.getGroup(to)
             let res = "╭───「 Welcome 」"
@@ -1208,9 +1277,9 @@ event.on('message-new', async(chat) =>{
             res += "\n│ • Welcome <on/off>"
             res += "\n│ • Welcome <message>"
             res += "\n╰───「 Hello World 」"
-            if (xtext == "welcome") { 
+            if (cmd == "welcome") { 
                 wa.sendMessage(to, res)
-            } else if (cond[0] == "on") {
+            } else if (cond[0].toLowerCase() == "on") {
                 if (wait.responder.welcome.status){
                     wait.responder.welcome.GROUP.push(to)
                     wait.responder.welcome.message[to] = "Welcome @!"
@@ -1221,7 +1290,7 @@ event.on('message-new', async(chat) =>{
                     wait.responder.welcome.message[to] = "Welcome @!"
                     wa.sendMessage(to, `Success activated Auto Respon Welcome *${g.subject}*`)
                 }
-            } else if (cond[0] == "off") {
+            } else if (cond[0].toLowerCase() == "off") {
                 if (wait.responder.welcome.status){
                     wait.responder.welcome.GROUP.splice(to)
                     wa.sendMessage(to, "Auto Respon Welcome already deactive *"+g.subject+"*")
@@ -1235,7 +1304,9 @@ event.on('message-new', async(chat) =>{
                 wa.sendMessage(to, ' 「 Auto Respon 」\nAuto Respon Welcome has been set to:\n_'+wait.responder.welcome.message[to]+'_ \nTo: *'+g.subject+'*')
             }
         } else if (cmd.startsWith("leave")) {
-            const xtext = cmd.replace("leave" + " ", "")
+            if (!modecmd(sender)) return
+            var sep = text.split(' ')
+            const xtext = text.replace(sep[0] + " ", "")
             cond = xtext.split(" ")
             g = await wa.getGroup(to)
             let res = "╭───「 Leave 」"
@@ -1246,9 +1317,9 @@ event.on('message-new', async(chat) =>{
             res += "\n│ • Leave <on/off>"
             res += "\n│ • Leave <message>"
             res += "\n╰───「 Hello World 」"
-            if (xtext == "leave") { 
+            if (cmd == "leave") { 
                 wa.sendMessage(to, res)
-            } else if (cond[0] == "on") {
+            } else if (cond[0].toLowerCase() == "on") {
                 if (wait.responder.leave.status){
                     wait.responder.leave.GROUP.push(to)
                     wait.responder.leave.message[to] = "Sayonara @!"
@@ -1259,7 +1330,7 @@ event.on('message-new', async(chat) =>{
                     wait.responder.leave.message[to] = "Sayonara @!"
                     wa.sendMessage(to, `Success activated Auto Respon Leave *${g.subject}*`)
                 }
-            } else if (cond[0] == "off") {
+            } else if (cond[0].toLowerCase() == "off") {
                 if (wait.responder.leave.status){
                     wait.responder.leave.GROUP.splice(to)
                     wa.sendMessage(to, "Auto Respon Leave already deactive *"+g.subject+"*")
