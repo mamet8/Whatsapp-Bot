@@ -310,6 +310,8 @@ event.on('message-new', async(chat) =>{
             mat += '⤷ Ig\n'
             mat += '⤷ Youtube\n'
             mat += '⤷ Apkpure\n'
+            mat += '⤷ PokemonRandom\n'
+            mat += '⤷ Pokemon <text>\n'
             mat += '⤷ Dobgin <text>\n'
             mat += '⤷ Nekobin <text>\n'
             mat += '⤷ Nickff <id>\n'
@@ -735,6 +737,55 @@ event.on('message-new', async(chat) =>{
             fox += "\n*Info :* " + asu.intro
             wa.sendMediaURL(to, asu.cover1, fox)
             await wa.sendMediaURL(to, asu.cv[0].audio[2])
+        } else if (cmd.startsWith("pokemonrandom")) {
+            if (!modecmd(sender)) return
+            const response = await requests("http://hujanapi.xyz/api/pokemon?apikey="+APIKUY)
+            const datas = await response.json()
+            const asu = datas.result
+            let weak = ""
+            for (let i of asu.weakness) {
+                weak += i+", "
+            }
+            let tipe = ""
+            for (let i of asu.type) {
+                tipe += i+", "
+            }
+            let fox = "*Detail Pokemon*\n"
+            fox += "\n*Title :* " + asu.name
+            fox += "\n*Desc :* "+asu.desc
+            fox += "\n*Info :*"
+            fox += "\n  _Abilities :_ "+asu.description.abilities
+            fox += "\n  _Category :_ "+asu.description.category
+            fox += "\n  _Height :_ "+asu.description.height
+            fox += "\n  _Weight :_ "+asu.description.weight
+            fox += "\n*Weakness :* "+weak
+            fox += "\n*Type :* "+tipe
+            wa.sendMediaURL(to, asu.img, fox)
+        } else if (cmd.startsWith("pokemon ")) {
+            if (!modecmd(sender)) return
+            const xtext = cmd.replace("pokemon ", "")
+            const response = await requests("http://hujanapi.xyz/api/pokemonx?query="+xtext+"&apikey="+APIKUY)
+            const datas = await response.json()
+            const asu = datas.result
+            let weak = ""
+            for (let i of asu.weakness) {
+                weak += i+", "
+            }
+            let tipe = ""
+            for (let i of asu.type) {
+                tipe += i+", "
+            }
+            let fox = "*Detail Pokemon*\n"
+            fox += "\n*Title :* " + asu.name
+            fox += "\n*Desc :* "+asu.desc
+            fox += "\n*Info :*"
+            fox += "\n  _Abilities :_ "+asu.description.abilities
+            fox += "\n  _Category :_ "+asu.description.category
+            fox += "\n  _Height :_ "+asu.description.height
+            fox += "\n  _Weight :_ "+asu.description.weight
+            fox += "\n*Weakness :* "+weak
+            fox += "\n*Type :* "+tipe
+            wa.sendMediaURL(to, asu.img, fox)
         } else if (cmd.startsWith("lirik")) {
             if (!modecmd(sender)) return
             const xtext = cmd.replace('lirik' + " ", "")
