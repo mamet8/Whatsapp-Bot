@@ -9,6 +9,7 @@ const {Duplex} = require('stream');
 const { exec } = require("child_process");
 const util = require("util")
 const speed = require('performance-now')
+const { GroupSettingChange } = require("@adiwajshing/baileys");
 
 
 conn.connectToWhatsApp()
@@ -72,11 +73,22 @@ event.on('message-new', async(chat) =>{
     const to = msg.key.remoteJid
     const msg_id = msg.key.id
     const args = cmd.split(' ')
-    console.log(clc.blue("=============================================="));
-    console.log(clc.red("[ SENDER ] : "+ sender));
-    console.log(clc.yellow("[ TO ] : "+to));
-    console.log(clc.green("[ MSG ] : "+ text));
-    console.log(clc.blue("=============================================="));
+    if(!msg.isGroup){
+        console.log(clc.blue("=============================================="));
+        console.log(clc.red("[ SENDER ] : "+ sender));
+        console.log(clc.yellow("[ TO ] : "+to));
+        console.log(clc.green("[ MSG ] : "+ text));
+        console.log(clc.blue("=============================================="));
+    } else {
+        group = await wa.getGroup(to)
+        console.log(clc.blue("=============================================="));
+        console.log(clc.red("[ SENDER ] : "+ sender));
+        console.log(clc.yellow("[ TO ] : "+to+" | "+group.subject));
+        console.log(clc.green("[ MSG ] : "+ text));
+        console.log(clc.blue("=============================================="));
+    }
+//============================================================
+
     if(msg.key.fromMe){
         tmp_ids.push(msg_id)
         if (cmd == "mode public"){
@@ -182,6 +194,27 @@ event.on('message-new', async(chat) =>{
             } else {
                 wa.sendMessage(to, "Error❌, Bot Cannot Unsend message other people!")
             }
+        } else if (Object.keys(msg.quoted)[0] === "imageMessage"){
+            if (cmd == "set pictgroup") {
+                if (msg.isGroup){
+                    try{
+                        msg.message = msg.quoted
+                        const file = await event.downloadAndSaveMediaMessage(msg, "./media/"+msg_id)
+                        console.log(file)
+                        const img = fs.readFileSync(file)
+                        await event.updateProfilePicture(to, img)
+                        wa.sendReply(to, "Success Change Picture Group")
+                        fs.unlinkSync(file)
+                    } catch {wa.sendReplyWA(to, "Failed\nOnly Admin can settings group picture", "Change Group Picture")}
+                } else {wa.sendMessage(to, 'Only Group')}
+            } else if (cmd == "set profile") {
+                msg.message = msg.quoted
+                const file = await event.downloadAndSaveMediaMessage(msg, "./media/"+msg_id)
+                const img = fs.readFileSync(file)
+                await event.updateProfilePicture(event.user.jid, img)
+                wa.sendReply(to, "Success Change Picture Profile")
+                fs.unlinkSync(file)
+            }
         }
     }
     if (wait.responder.tag.status){
@@ -257,11 +290,14 @@ event.on('message-new', async(chat) =>{
             mat += '⤷ Me\n'
             mat += '⤷ Speed\n'
             mat += '⤷ Settings\n'
-            mat += '⤷ grouplist\n'
+            mat += '⤷ Grouplist\n'
             mat += '⤷ Tagall\n'
             mat += '⤷ Grouplink\n'
             mat += '⤷ Admingroup\n'
             mat += '⤷ Ownergroup\n'
+            mat += '⤷ Onlyadminmsg\n'
+            mat += '⤷ Setgroupdesc <text>\n'
+            mat += '⤷ Setgroupname <text>\n'
             mat += '⤷ Fakereply <msg you>|<msg target>|<@>\n'
             mat += '⤷ Hidetag\n'
             mat += '⤷ Getpict <@>\n'
@@ -325,6 +361,8 @@ event.on('message-new', async(chat) =>{
             mat += '⤷ Listhero mllogo\n'
             mat += '⤷ Listhero fflogo\n'
             mat += '\n*Reply Command:*\n'
+            mat += '⤷ Set Picture\n'
+            mat += '⤷ Set Pictgroup\n'
             mat += '⤷ Img2url\n'
             mat += '⤷ Totext\n'
             mat += '⤷ To sscode\n'
@@ -394,6 +432,22 @@ event.on('message-new', async(chat) =>{
             if (!modecmd(sender)) return
             const code = await wa.getGroupInvitationCode(to)
             wa.sendMessage(to, code)
+        } else if (cmd.startsWith("setgroupdesc")){
+            if (!modecmd(sender)) return
+            const xtext = cmd.replace('setgroupdesc' + " ", "")
+            try {
+                await event.groupUpdateDescription(to, xtext)
+            } catch {
+                wa.sendReply(to, "Failed\nOnly Admin can settings group desc")
+            }
+        } else if (cmd.startsWith("setgroupname")){
+            if (!modecmd(sender)) return
+            const xtext = cmd.replace('setgroupname' + " ", "")
+            try {
+                await event.groupUpdateSubject(to, xtext)
+            } catch {
+                wa.sendReply(to, "Failed\nOnly Admin can settings group name")
+            }
         } else if (cmd.startsWith("groupinfo")){
             if (!modecmd(sender)) return
             const pict = await wa.getPict(to)
@@ -1221,6 +1275,33 @@ event.on('message-new', async(chat) =>{
                 const data = await response.json()
                 const mat = data.result.media[0]
                 wa.sendMediaURL(to, mat.video_url)
+            }
+
+        } else if (cmd.startsWith("onlyadminmsg")) {
+            if (!modecmd(sender)) return
+            var sep = text.split(' ')
+            const xtext = text.replace(sep[0] + " ", "")
+            cond = xtext.split(" ")
+            g = await wa.getGroup(to)
+            let res = "╭───「 Auto OnlyadminMsg 」"
+            res += "\n├ Status : " + wait.responder.tag.status
+            res += "\n├ Message : " + wait.responder.tag.message[to]
+            res += "\n├ Usage : "
+            res += "\n│ • Onlyadminmsg"
+            res += "\n│ • Onlyadminmsg <on/off>"
+            res += "\n╰───「 Hello World 」"
+            if (cmd == "onlyadminmsg") { 
+                wa.sendMessage(to, res)
+            } else if (cond[0].toLowerCase() == "on") {
+                admin = await wa.getAdminIds(to)
+                if (admin.includes(event.user.jid) == true){
+                    await event.groupSettingChange(to, GroupSettingChange.messageSend, true)
+                } else { wa.sendReply(to, "Bot Not Admin!") }
+            } else if (cond[0].toLowerCase() == "off") {
+                admin = await wa.getAdminIds(to)
+                if (admin.includes(event.user.jid) == true){
+                    await event.groupSettingChange(to, GroupSettingChange.messageSend, false)
+                } else { wa.sendReply(to, "Bot Not Admin!") }
             }
 
         } else if (cmd.startsWith("respontag")) {
