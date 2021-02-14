@@ -41,7 +41,7 @@ function normalizeMention(to, txt, mention=[]){
 exports.getRandom = (ext) => {
     return `${Math.floor(Math.random() * 10000)}${ext}`
 }
-
+    
 exports.serialize = function(chat){
     m = JSON.parse(JSON.stringify(chat))
     content = m.message
@@ -103,16 +103,15 @@ exports.sendAudio = function(to, filename, text=""){
 	wa.sendMessage(to, bufer, MessageType.mp4Audio, { mimetype: Mimetype.mp4Audio, ptt: true})
 }
 
-//send Pdf
-exports.sendPdf = function(to, filename){
-    const bufer = fs.readFileSync(filename)
-    wa.sendMessage(to, bufer, MessageType.document, { mimetype: Mimetype.pdf})
-}
-
 //send Video
 exports.sendVideo = function(to, filename, text=""){
 	const bufer = fs.readFileSync(filename)
 	wa.sendMessage(to, bufer, MessageType.video, {caption: text})
+}
+//send Video
+exports.sendPdf = function(to, filename, text="HujanAPI.pdf"){
+    const bufer = fs.readFileSync(filename)
+    wa.sendMessage(to, bufer, MessageType.document, { mimetype: Mimetype.pdf, title: text})
 }
 
 //send GIF
@@ -124,6 +123,7 @@ exports.sendSticker = function(to, filename){
     const bufer = fs.readFileSync(filename)
     wa.sendMessage(to, bufer, MessageType.sticker)
 }
+
 //
 exports.sendStickerUrl = async(to, url) => {
     var names = Date.now() / 10000;
@@ -164,6 +164,10 @@ exports.sendMediaURL = async(to, url, text="", mids=[]) =>{
 		if(mime === "image/gif"){
             type = MessageType.video
             mime = Mimetype.gif
+        }
+        if(mime === "application/pdf"){
+            type = MessageType.document
+            mime = Mimetype.pdf
         }
         if(mime.split("/")[0] === "audio"){
             mime = Mimetype.mp4Audio
@@ -332,12 +336,32 @@ exports.hideTag = async function(to, text){
     for (let member of members) {
         mids.push(member.jid)
     }
-    wa.sendMessage(to, text, MessageType.text, {
-        contextInfo: {
-            "mentionedJid": mids
-        }
-    })
+    wa.sendMessage(to, text, MessageType.text, { contextInfo: { "mentionedJid": mids } })
 }
+
+//send image HideTag
+exports.hideTagImage = async function(to, filename){
+    const bufer = fs.readFileSync(filename)
+    var mat = await wa.groupMetadata(to)
+    var members = mat.participants
+    let mids = []
+    for (let member of members) {
+        mids.push(member.jid)
+    }
+    wa.sendMessage(to, bufer, MessageType.image, { contextInfo: { "mentionedJid": mids } })
+}
+
+exports.hideTagSticker = async function(to, filename){
+    const bufer = fs.readFileSync(filename)
+    var mat = await wa.groupMetadata(to)
+    var members = mat.participants
+    let mids = []
+    for (let member of members) {
+        mids.push(member.jid)
+    }
+    wa.sendMessage(to, bufer, MessageType.sticker, { contextInfo: { "mentionedJid": mids } })
+}
+
 //Fake Reply
 exports.fakeReply = async function(to, target, text, prevtext, mention=[], msgId="B826873620DD5947E683E3ABE663F263"){
     mention = m.message.extendedTextMessage.contextInfo.mentionedJid[0]
@@ -359,6 +383,14 @@ exports.setName = async function(query){
 exports.setBio = async function(query){
     const response = await wa.setStatus(query)
     return response
+}
+
+// Thumbnail
+exports.setThumbnail = function(to, text, title, desc, filename){
+    const bufer = fs.readFileSync(filename)
+    const descx = desc
+    const titlex = title
+    wa.sendMessage(to, text, MessageType.extendedText, { text: text, matchedText: text, title: titlex, desc: descx, previewType: 'NONE', jpegThumbnail: bufer })
 }
 
 exports.sendReply = function(to, text, mids=[]){
