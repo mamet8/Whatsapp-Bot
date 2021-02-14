@@ -93,22 +93,23 @@ event.on('message-new', async(chat) =>{
         tmp_ids.push(msg_id)
         if (cmd == "mode public"){
             if (wait.Modepublic.status){
-                wa.sendMessage(to, 'Mode Public already active')
+                wa.sendReply(to, 'Mode Public already active')
             } else {
                 wait.Modepublic.status = true
-                wa.sendMessage(to, 'Success activated Mode Public')
+                wa.sendReply(to, 'Success activated Mode Public')
             }
         } else if (cmd == "mode self"){
             if (!wait.Modepublic.status){
-                wa.sendMessage(to, 'Mode Self already active')
+                wa.sendReply(to, 'Mode Self already active')
             } else {
                 wait.Modepublic.status = false
-                wa.sendMessage(to, 'Success activated Mode Self')
+                wa.sendReply(to, 'Success activated Mode Self')
             }
         }
     }
     if (msg.quoted){
-        if (text == "img2url"){
+        if (!modecmd(sender)) return
+        if (cmd == "img2url"){
             if (Object.keys(msg.quoted)[0] === "imageMessage"){
                 msg.message = msg.quoted
                 const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
@@ -120,14 +121,14 @@ event.on('message-new', async(chat) =>{
                 wa.sendMessage(to, ret.result.url)
                 fs.unlinkSync(file)
             }
-        } else if (text == "to sscode"){
+        } else if (cmd == "to sscode"){
             if (Object.keys(msg.quoted)[0] === "conversation"){
                 xtext = msg.quoted.conversation
                 const code = await requests('http://hujanapi.xyz/api/sscode?query='+xtext+'&apikey='+APIKUY)
                 const mat = await code.json()
                 wa.sendMediaURL(to,mat.result)
             }
-        } else if (text == "totext"){
+        } else if (cmd == "totext"){
             if (Object.keys(msg.quoted)[0] === "audioMessage") {
                 msg.message = msg.quoted
                 const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
@@ -140,7 +141,7 @@ event.on('message-new', async(chat) =>{
                 fs.unlinkSync(file)
             }
         } else if (Object.keys(msg.quoted)[0] === "stickerMessage"){
-            if (text == "toimg") {
+            if (cmd == "toimg") {
                 msg.message = msg.quoted
                 gerak = msg.quoted.stickerMessage.firstFrameSidecar
                 const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
@@ -152,7 +153,7 @@ event.on('message-new', async(chat) =>{
                     wa.sendImage(to, mat)
                     fs.unlinkSync(mat)
                 })
-            } else if (text == "tomp4") {
+            } else if (cmd == "tomp4") {
                 msg.message = msg.quoted
                 const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
                 const stream = fs.createReadStream(file);
@@ -162,8 +163,13 @@ event.on('message-new', async(chat) =>{
                 const ret =  await res.json()
                 wa.sendMediaURL(to, ret.result)
                 fs.unlinkSync(file)
+            } else if (cmd == "to hidetag"){
+                msg.message = msg.quoted
+                const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
+                wa.hideTagSticker(to, file)
+                fs.unlinkSync(file)
             }
-        } else if (text == "sticker"){
+        } else if (cmd == "sticker"){
             if (Object.keys(msg.quoted)[0] === "imageMessage") {
                 msg.message = msg.quoted
                 const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
@@ -187,7 +193,14 @@ event.on('message-new', async(chat) =>{
                     fs.unlinkSync(mat)
                 })
             }
-        } else if (text == "delete"){
+        } else if (cmd == "to hidetag"){
+            if (Object.keys(msg.quoted)[0] === "imageMessage") {
+                msg.message = msg.quoted
+                const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
+                wa.hideTagImage(to, file)
+                fs.unlinkSync(file)
+            }
+        } else if (cmd == "delete"){
             idx = msg.message.extendedTextMessage.contextInfo.stanzaId
             if (tmp_ids.includes(idx)) {
                 event.deleteMessage(to, { id: idx, remoteJid: to, fromMe: true })
@@ -309,6 +322,10 @@ event.on('message-new', async(chat) =>{
             mat += '\n*Media:*\n'
             mat += '⤷ Ig\n'
             mat += '⤷ Youtube\n'
+            mat += '⤷ Quranlist\n'
+            mat += '⤷ Surah <num>\n'
+            mat += '⤷ Ayatkursi\n'
+            mat += '⤷ Nabi\n'
             mat += '⤷ Apkpure\n'
             mat += '⤷ PokemonRandom\n'
             mat += '⤷ Pokemon <text>\n'
@@ -368,6 +385,7 @@ event.on('message-new', async(chat) =>{
             mat += '⤷ Img2url\n'
             mat += '⤷ Totext\n'
             mat += '⤷ To sscode\n'
+            mat += '⤷ To Hidetag <img/sticker>\n'
             mat += '⤷ Toimg\n'
             mat += '⤷ Tomp4'
             wa.sendMention(to, mat, [cr1,cr2])
@@ -530,7 +548,7 @@ event.on('message-new', async(chat) =>{
             }else{
                 wa.sendReply(to, "Bot Not Admin!")
             }
-        } else if (txt.startsWith("add")) {
+        } else if (cmd.startsWith("add")) {
             if (!modecmd(sender)) return
             admin = await wa.getAdminIds(to)
             if (admin.includes(event.user.jid) == true){
@@ -548,6 +566,36 @@ event.on('message-new', async(chat) =>{
             }
 
 //============[ Media ]============\\
+        } else if (cmd.startsWith("quranlist")) {
+            if (!modecmd(sender)) return
+            const response = await requests("http://hujanapi.xyz/api/surahalquran?apikey="+APIKUY)
+            const mat = await response.json()
+            let num = 0
+            let xyz = "╭──「 Al-Qur'an 」"
+            for (i of mat.data){
+                num += 1
+                xyz += "\n│ "+num+". "+i.name.transliteration.id
+            }
+            xyz += "╰ 「 Total: "+mat.data.length+" Surah 」"
+            wa.sendReply(to, xyz)
+        } else if (cmd.startsWith("surah")) {
+            const xtext = text.replace("surah ", "")
+            const response = await requests("http://hujanapi.xyz/api/surah?query="+xtext+"&apikey="+APIKUY)
+            const mat = await response.json()
+            let num = 0
+            let xyz = " 「 Al-Qur'an 」\nSurah: *"+mat.name+"*\n"
+            for (i of mat.verses){
+                num += 1
+                xyz += "\n"+num+". "+i.text
+            }
+            wa.sendReply(to, xyz)
+        } else if (cmd.startsWith("ayatkursi")) {
+            if (!modecmd(sender)) return
+            const response = await requests("http://hujanapi.xyz/api/ayatkursi?apikey="+APIKUY)
+            const mat = await response.json()
+            let xyz = "*Ayatkursi*\n\n"
+            xyz += mat.data.arabic
+            wa.sendReply(to, xyz)
         } else if (cmd.startsWith("pinterest")) {
             if (!modecmd(sender)) return
             const xtext = cmd.replace('pinterest' + " ", "")
@@ -570,7 +618,7 @@ event.on('message-new', async(chat) =>{
                 fox += "\nIsya: "+i.Isya
             }
             wa.sendReply(to, fox)
-        } else if (txt.startsWith("stickerline")) {
+        } else if (cmd.startsWith("stickerline")) {
             if (!modecmd(sender)) return
             const xtext = txt.replace('stickerline' + " ", "")
             const response = await requests("http://hujanapi.xyz/api/stickerline?url="+xtext+"&apikey="+APIKUY)
@@ -907,6 +955,30 @@ event.on('message-new', async(chat) =>{
                 fox += "\n" + no + ". " + asu[a]
             }
             wa.sendMessage(to, fox)
+        } else if (cmd.startsWith("nabi")) {
+            if (!modecmd(sender)) return
+            pemisah = cmd.split(" ")
+            const response = await requests("http://hujanapi.xyz/api/rasul?apikey="+APIKUY)
+            const datas = await response.json()
+            const xyz = datas.result.data
+            if (pemisah.length == 1) {
+                let num = 0
+                let fox = "╭──「 Nama Nabi 」"
+                for (i of xyz) {
+                    num += 1
+                    fox += "\n│ "+num+". "+i.name
+                }
+                fox += "\n│\n╰ *Hey* @! *For detail*:\n```nabi [number]```"
+                wa.sendReply(to, fox, [sender])
+            }
+            if (pemisah.length == 2) {
+                const value = Number(pemisah[1] - 1)
+                console.log(value)
+                let fox = "Title : " + xyz[value].name
+                fox += "\nPlace : " + xyz[value].place
+                fox += "\nStory :\n" + xyz[value].description
+                wa.sendMediaURL(to, xyz[value].image_url, fox)
+            }
         } else if (cmd.startsWith("shopee ")) {
             if (!modecmd(sender)) return
             const xtext = cmd.replace("shopee ", "")
@@ -927,7 +999,7 @@ event.on('message-new', async(chat) =>{
             }
             if (pemisah.length == 2) {
                 const num = pemisah[1]
-                const value = Number(pemisah[1])
+                const value = Number(pemisah[1] - 1)
                 let fox = "*_Detail Product Shopee*_\n"
                 fox += "\nTitle : " + asu[value].name
                 fox += "\nShop Loc : " + asu[value].shop_loc
@@ -972,7 +1044,7 @@ event.on('message-new', async(chat) =>{
             }
             if (pemisah.length == 2) {
                 const num = pemisah[1]
-                const value = Number(pemisah[1])
+                const value = Number(pemisah[1] - 1)
                 let fox = "*_Detail Video*_\n"
                 fox += "\nTitle : " + asu[value].title
                 fox += "\nDuration : " + asu[value].duration
@@ -1001,7 +1073,7 @@ event.on('message-new', async(chat) =>{
             }
             if (pemisah.length == 2) {
                 const num = pemisah[1]
-                const value = Number(pemisah[1])
+                const value = Number(pemisah[1] - 1)
                 let fox = "*_Detail Video*_\n"
                 fox += "\nTitle : " + asu[value].title
                 fox += "\nDuration : " + asu[value].duration
@@ -1113,65 +1185,65 @@ event.on('message-new', async(chat) =>{
                 fox += "\n" + no + ". "+i
             }
             wa.sendReply(to, fox)
-        } else if (txt.startsWith("wetglass")) {
+        } else if (cmd.startsWith("wetglass")) {
             if (!modecmd(sender)) return
             const xtext = txt.replace('wetglass' + " ", "")
             const response = await requests("http://hujanapi.xyz/api/wetglass?text="+xtext+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
-        } else if (txt.startsWith("thunder")) {
+        } else if (cmd.startsWith("thunder")) {
             if (!modecmd(sender)) return
             const xtext = txt.replace('thunder' + " ", "")
             const response = await requests("http://hujanapi.xyz/api/thunder?text="+xtext+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
-        } else if (txt.startsWith("blackpink")) {
+        } else if (cmd.startsWith("blackpink")) {
             if (!modecmd(sender)) return
             const xtext = txt.replace('blackpink' + " ", "")
             const response = await requests("http://hujanapi.xyz/api/blackpink?text="+xtext+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
-        } else if (txt.startsWith("skyonline")) {
+        } else if (cmd.startsWith("skyonline")) {
             if (!modecmd(sender)) return
             const xtext = txt.replace('skyonline' + " ", "")
             const response = await requests("http://hujanapi.xyz/api/skyonline?text="+xtext+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
-        } else if (txt.startsWith("greenneon")) {
+        } else if (cmd.startsWith("greenneon")) {
             if (!modecmd(sender)) return
             const xtext = txt.replace('greenneon' + " ", "")
             const response = await requests("http://hujanapi.xyz/api/greenneon?text="+xtext+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
-        } else if (txt.startsWith("glitchtext")) {
+        } else if (cmd.startsWith("glitchtext")) {
             if (!modecmd(sender)) return
             const xtext = txt.replace('glitchtext' + " ", "")
             pemisah = xtext.split("|")
             const response = await requests("http://hujanapi.xyz/api/glitch_text?text1="+pemisah[0]+"&text2="+pemisah[1]+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
-        } else if (txt.startsWith("marvelavengers")) {
+        } else if (cmd.startsWith("marvelavengers")) {
             if (!modecmd(sender)) return
             const xtext = txt.replace('marvelavengers' + " ", "")
             pemisah = xtext.split("|")
             const response = await requests("http://hujanapi.xyz/api/marvelavengers?text1="+pemisah[0]+"&text2="+pemisah[1]+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
-        } else if (txt.startsWith("marvelstudio")) {
+        } else if (cmd.startsWith("marvelstudio")) {
             if (!modecmd(sender)) return
             const xtext = txt.replace('marvelstudio' + " ", "")
             pemisah = xtext.split("|")
             const response = await requests("http://hujanapi.xyz/api/marvelstudio?text1="+pemisah[0]+"&text2="+pemisah[1]+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
-        } else if (txt.startsWith("wolfblack")) {
+        } else if (cmd.startsWith("wolfblack")) {
             if (!modecmd(sender)) return
             const xtext = txt.replace('wolfblack' + " ", "")
             pemisah = xtext.split("|")
             const response = await requests("http://hujanapi.xyz/api/wolf_black?text1="+pemisah[0]+"&text2="+pemisah[1]+"&apikey="+APIKUY)
             const mat = await response.json()
             wa.sendMediaURL(to, mat.result, "*Your Requests*")
-        } else if (txt.startsWith("pornhub")) {
+        } else if (cmd.startsWith("pornhub")) {
             if (!modecmd(sender)) return
             const xtext = txt.replace('pornhub' + " ", "")
             pemisah = xtext.split("|")
@@ -1475,7 +1547,7 @@ event.on('message-new', async(chat) =>{
                 wait.responder.leave.message[to] = xtext
                 wa.sendMessage(to, ' 「 Auto Respon 」\nAuto Respon Leave has been set to:\n_'+wait.responder.leave.message[to]+'_ \nTo: *'+g.subject+'*')
             }
-        } else if (txt.startsWith("responpm msg")) {
+        } else if (cmd.startsWith("responpm msg")) {
             if (owner.includes(sender)){
                 const xtext = txt.replace('responpm msg' + " ", "")
                 wait.responder.pm = xtext
