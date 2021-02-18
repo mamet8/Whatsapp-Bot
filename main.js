@@ -91,21 +91,6 @@ event.on('message-new', async(chat) =>{
 
     if(msg.key.fromMe){
         tmp_ids.push(msg_id)
-        if (cmd == "mode public"){
-            if (wait.Modepublic.status){
-                wa.sendReply(to, 'Mode Public already active')
-            } else {
-                wait.Modepublic.status = true
-                wa.sendReply(to, 'Success activated Mode Public')
-            }
-        } else if (cmd == "mode self"){
-            if (!wait.Modepublic.status){
-                wa.sendReply(to, 'Mode Self already active')
-            } else {
-                wait.Modepublic.status = false
-                wa.sendReply(to, 'Success activated Mode Self')
-            }
-        }
     }
     if (msg.quoted){
         if (!modecmd(sender)) return
@@ -271,6 +256,20 @@ event.on('message-new', async(chat) =>{
             if (!modecmd(sender)) return
                 wa.sendReply(to, "hai juga")
                 wa.sendReplyWA(to, "Hey @!", "HujanAPI.xyz", [sender])
+        }else if (cmd == "mode public"){
+            if (owner.includes(sender)){
+                wa.sendReply(to, 'Mode Public already active')
+            } else {
+                wait.Modepublic.status = true
+                wa.sendReply(to, 'Success activated Mode Public')
+            }
+        } else if (cmd == "mode self"){
+            if (owner.includes(sender)){
+                wa.sendReply(to, 'Mode Self already active')
+            } else {
+                wait.Modepublic.status = false
+                wa.sendReply(to, 'Success activated Mode Self')
+            }
         } else if (cmd === "me"){
             if (!modecmd(sender)) return
                 wa.sendContact(to, sender, "Your Contact")
@@ -510,6 +509,7 @@ event.on('message-new', async(chat) =>{
             }
         } else if (cmd.startsWith("hidetag")) {
             if (!modecmd(sender)) return
+            if (args.length === 1) return 
             const xtext = cmd.replace('hidetag' + " ", "")
             wa.hideTag(to, xtext)
         } else if (cmd.startsWith("fakereply")) {
