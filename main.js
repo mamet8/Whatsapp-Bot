@@ -3,10 +3,12 @@ const conn = require("./mat/connect")
 const wa = require("./mat/helper")
 const fs = require("fs")
 const requests = require("node-fetch")
+const request = require('request');
 const clc = require('chalk');
 const FormData =require('form-data');
 const {Duplex} = require('stream');
 const { exec } = require("child_process");
+const imgToPDF = require('image-to-pdf');
 const util = require("util")
 const speed = require('performance-now')
 const { GroupSettingChange } = require("@adiwajshing/baileys");
@@ -369,6 +371,9 @@ event.on('message-new', async(chat) =>{
             mat += '⤷ Randomcry\n'
             mat += '⤷ Randomanime\n'
             mat += '⤷ Randomwaifu\n'
+            mat += '⤷ Doujin\n'
+            mat += '⤷ Kiryuu <text>\n'
+            mat += '⤷ Kiryuudl <url>\n'
             mat += '⤷ Shopee <text>\n'
             mat += '⤷ Xvideos <text>\n'
             mat += '⤷ Xvideosdl <url>\n'
@@ -1023,6 +1028,132 @@ event.on('message-new', async(chat) =>{
                 //fox += num+". Title: "+i.title+"\nDesc: "+i.description+"\nPublishedAt: "+i.publishedAt+"\nSource: "+i.source.name+"\nURL:"+i.url+"\n\n"
             }
             wa.sendReply(to, fox)
+        } else if (cmd.startsWith("doujin")) {
+            if (!modecmd(sender)) return
+            var sep = text.split(' ')
+            const xtext = text.replace(sep[0] + " ", "")
+            cond = xtext.split(" ")
+            let res = "╭───「 Doujin 」"
+            res += "\n├ Usage : "
+            res += "\n│ • Doujin"
+            res += "\n│ • Doujin Search <text>"
+            res += "\n│ • Doujin Post <URL>"
+            res += "\n│ • Doujin Latest"
+            res += "\n╰───「 Hello World 」"
+            if (cmd == "doujin") { 
+                wa.sendMessage(to, res)
+            } else if (cond[0].toLowerCase() == "search") {
+                const response = await requests("http://hujanapi.xyz/api/doujindesuserach?query="+cond[1]+"&apikey="+APIKUY)
+                const data = await response.json()
+                const chap = data.result.chap
+                let genres = ""
+                for (let i of data.result.genre) {
+                    genres += i+", "
+                }
+                let d = "  ｢ Doujin Search ｣\n"
+                d += "\n• Title : "+data.result.title
+                d += "\n• Genre : "+genres
+                d += "\n• Total : "+chap.length+" Chapter"
+                d += "\n• Info : \n"+data.result.info
+                wa.sendMediaURL(to, data.result.img, d)
+            } else if (cond[0].toLowerCase() == "post"){
+                wa.sendReply(to, "Please wait....")
+                const response = await requests("http://hujanapi.xyz/api/doujindesudl?url="+cond[1]+"&apikey="+APIKUY)
+                const mat = await response.json()
+                const media = mat.result.data
+                const title = mat.result.title
+                console.log(title)
+                const PDFpages = [];
+                for (let i = 0; i < media.length; i++) {
+                    image_name = './media/tmp/imagepdf/'+i+'.jpg';
+                    await new Promise((resolve) => request(media[i]).pipe(fs.createWriteStream(image_name)).on('finish', resolve))
+                    PDFpages.push(image_name);
+                }
+                imgToPDF(PDFpages, 'A4').pipe(fs.createWriteStream('output.pdf'));
+                try {
+                    fs.readdir("./media/tmp/imagepdf/", (err, files) => {
+                        if (err) throw err;
+                        for (const file of files) {
+                            fs.unlink(path.join("./media/tmp/imagepdf/", file), err => {
+                            if (err) throw err;
+                        });
+                      }
+                    });
+                } catch (eRR) {
+                    console.log(eRR);
+                }
+                setTimeout(async ()=>{return await wa.sendPdf(to, './output.pdf', mat.result.title);},5000)
+                setTimeout(async ()=>{return await fs.unlinkSync('./output.pdf');},5000)
+            } else if (cond[0].toLowerCase() == "latest"){
+                const response = await requests("http://hujanapi.xyz/api/doujindesulatest?&apikey="+APIKUY)
+                const data = await response.json()
+                num = 0
+                let d = "  ｢ Doujin Latest ｣\n"
+                for (let i of data.result.data) {
+                    num += 1
+                    d += "\n"+num+". Title: "+i.title+"\nChapter: "+i.chapter+"\nLink: "+i.url+"\n"
+                }
+                wa.sendMessage(to, d)
+            }
+        } else if (cmd.startsWith("kiryuu ")) {
+            if (!modecmd(sender)) return
+            const xtext = cmd.replace("kiryuu ", "")
+            pemisah = xtext.split("|")
+            const response = await requests("http://hujanapi.xyz/api/kiryuu?query="+pemisah[0]+"&apikey="+APIKUY)
+            const datas = await response.json()
+            const asu = datas.result.data
+            if (pemisah.length == 1)  {
+                let num = 0
+                let fox = "*_Kiryuu Search_*\n\n"
+                for (var a = 0; a < asu.length; a++) {
+                    num += 1
+                    fox += "```"+asu[a].title+"```\n"+asu[a].url+"```("+num+")```\n"
+                }
+                fox += "\n\n*Hey* @! *For detail*:\n```kiryuu "+xtext+"|number```"
+                wa.sendMention(to, fox, [sender])
+            }
+            if (pemisah.length == 2) {
+                const value = Number(pemisah[1] - 1)
+                const r = await requests("http://hujanapi.xyz/api/kiryuuinfo?url="+asu[value].url+"&apikey="+APIKUY)
+                const mat = await r.json()
+                const chap = mat.result.chapter
+                let d = "  ｢ Kiryuu Search ｣\n"
+                d += "\n• Title : "+mat.result.title
+                d += "\n• Total : "+chap.length+" Chapter"
+                d += "\n• Sipnosis : "+mat.result.sipnosis
+                d += "\n• Info : \n"+mat.result.info
+                wa.sendMediaURL(to, mat.result.img, d)
+            }
+         } else if (cmd.startsWith("kiryuudl ")) {
+            if (!modecmd(sender)) return
+            const xtext = cmd.replace("kiryuudl ", "")
+            wa.sendReply(to, "Please wait....")
+            const response = await requests("http://hujanapi.xyz/api/kiryuudl?query="+xtext+"&apikey="+APIKUY)
+            const mat = await response.json()
+            const media = mat.result.data
+            const title = mat.result.title
+            console.log(title)
+            const PDFpages = [];
+            for (let i = 0; i < media.length; i++) {
+                image_name = './media/tmp/imagepdf/'+i+'.jpg';
+                await new Promise((resolve) => request(media[i]).pipe(fs.createWriteStream(image_name)).on('finish', resolve))
+                PDFpages.push(image_name);
+            }
+            imgToPDF(PDFpages, 'A4').pipe(fs.createWriteStream('output.pdf'));
+            try {
+                fs.readdir("./media/tmp/imagepdf/", (err, files) => {
+                    if (err) throw err;
+                    for (const file of files) {
+                        fs.unlink(path.join("./media/tmp/imagepdf/", file), err => {
+                        if (err) throw err;
+                    });
+                  }
+                });
+            } catch (eRR) {
+                console.log(eRR);
+            }
+            setTimeout(async ()=>{return await wa.sendPdf(to, './output.pdf', mat.result.title);},5000)
+            setTimeout(async ()=>{return await fs.unlinkSync('./output.pdf');},5000)
         } else if (cmd.startsWith("xvideos ")) {
             if (!modecmd(sender)) return
             const xtext = cmd.replace("xvideos ", "")
