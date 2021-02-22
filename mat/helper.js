@@ -386,11 +386,16 @@ exports.setBio = async function(query){
 }
 
 // Thumbnail
-exports.setThumbnail = function(to, text, title, desc, filename){
+exports.setThumbnail = async function(to, url, title, desc, filename){
     const bufer = fs.readFileSync(filename)
-    const descx = desc
-    const titlex = title
-    wa.sendMessage(to, text, MessageType.extendedText, { text: text, matchedText: text, title: titlex, desc: descx, previewType: 'NONE', jpegThumbnail: bufer })
+    var anu = {
+        detectLinks: false
+    }
+    var mat = await wa.generateLinkPreview(url)
+    mat.title = title;
+    mat.description = desc;
+    mat.jpegThumbnail = bufer;
+    wa.sendMessage(to, mat, MessageType.extendedText, anu)
 }
 
 exports.sendReply = function(to, text, mids=[]){
