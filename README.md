@@ -6,7 +6,7 @@ ___
 
 ### Installation
 ```bash
-> npm i @adiwajshing/baileys
+> npm i
 ```
 
 ### Usage
