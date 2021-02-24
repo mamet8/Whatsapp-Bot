@@ -183,15 +183,7 @@ exports.sendContact = function(to, id, name){
 	const vcard = 'BEGIN:VCARD\n' + 'VERSION:3.0\n' + 'FN:' + name + '\n' + 'ORG:Kontak\n' + 'TEL;type=CELL;type=VOICE;waid=' + id.split("@s.whatsapp.net")[0] + ':+' + id.split("@s.whatsapp.net")[0] + '\n' + 'END:VCARD'
 	wa.sendMessage(to, {displayname: name, vcard: vcard}, MessageType.contact)
 }
-//send reply
-exports.sendReply = function(to, text){
-    wa.sendMessage(to, txt, MessageType.text, { quoted: ma})
-    /*const txt = normalizeMention(to, text, mids)
-    if (txt) {
-        wa.sendMessage(to, txt, MessageType.text, { quoted: m})
-    }*/
-}
-
+//send Mention
 exports.sendMention = function(to, text, mids=[]){
     const txt = normalizeMention(to, text, mids)
     if(txt){
