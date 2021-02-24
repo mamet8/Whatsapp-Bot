@@ -91,6 +91,17 @@ event.on('message-new', async(chat) =>{
     }
 //============================================================
 
+    if (wait.gAutoRead.status){
+        if (msg.isGroup){
+            event.chatRead(to)
+        }
+    }
+    if (wait.pmAutoRead.status){
+        if (!msg.isGroup){
+            event.chatRead(to)
+        }
+    }
+    
     if(msg.key.fromMe){
         tmp_ids.push(msg_id)
     }
@@ -1556,6 +1567,52 @@ event.on('message-new', async(chat) =>{
                 if (admin.includes(event.user.jid) == true){
                     await event.groupSettingChange(to, GroupSettingChange.messageSend, false)
                 } else { wa.sendReply(to, "Bot Not Admin!") }
+            }
+            
+        } else if (cmd.startsWith("autoread")) {
+            if (!modecmd(sender)) return
+            var sep = text.split(' ')
+            const xtext = text.replace(sep[0] + " ", "")
+            textt = xtext.toLowerCase()
+            let res = "╭───「 Auto Read 」"
+            res += "\n├ Status : "
+            res += "\n│ • PM : " +wait.pmAutoRead.status
+            res += "\n│ • Group : " +wait.gAutoRead.status
+            res += "\n├ Usage : "
+            res += "\n│ • autoread"
+            res += "\n│ • autoread pm <on/off>"
+            res += "\n│ • autoread group <on/off>"
+            res += "\n╰───「 Hello World 」"
+            if (cmd == "autoread") { 
+                wa.sendMessage(to, res)
+            } else if (textt == "pm on") {
+                if (wait.pmAutoRead.status){
+                    wa.sendMessage(to, "Auto Read already active in PM")
+                } else {
+                    wait.pmAutoRead.status = true
+                    wa.sendMessage(to, "Success activated Auto Read in PM")
+                }
+            } else if (textt == "pm off") {
+                if (wait.pmAutoRead.status){
+                    wa.sendMessage(to, "Auto Read already deactive in PM")
+                } else {
+                    wait.pmAutoRead.status = false
+                    wa.sendMessage(to, "Success deactivated Auto Read in PM")
+                }
+            } else if (textt == "group on") {
+                if (wait.gAutoRead.status){
+                    wa.sendMessage(to, "Auto Read already active on Group")
+                } else {
+                    wait.gAutoRead.status = true
+                    wa.sendMessage(to, "Success activated Auto Read on Group")
+                }
+            } else if (textt == "group off") {
+                if (wait.gAutoRead.status){
+                    wa.sendMessage(to, "Auto Read already deactive on Group")
+                } else {
+                    wait.gAutoRead.status = false
+                    wa.sendMessage(to, "Success deactivated Auto Read on Group")
+                }
             }
 
         } else if (cmd.startsWith("respontag")) {
