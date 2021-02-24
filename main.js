@@ -327,6 +327,7 @@ event.on('message-new', async(chat) =>{
             mat += '⤷ Hidetag\n'
             mat += '⤷ Getpict <@>\n'
             mat += '⤷ Getbio <@>\n'
+            mat += '⤷ Autoread\n'
             mat += '⤷ Respontag\n'
             mat += '⤷ Welcome\n'
             mat += '⤷ Leave\n'
