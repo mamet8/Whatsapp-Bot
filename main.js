@@ -531,6 +531,7 @@ event.on('message-new', async(chat) =>{
             wa.hideTag(to, xtext)
         } else if (cmd.startsWith("fakereply")) {
             if (!modecmd(sender)) return
+            if (args.length === 1) return 
             const xtext = cmd.replace('fakereply' + " ", "")
             pemisah = xtext.split("|")
             user = m.message.extendedTextMessage.contextInfo.mentionedJid[0]
