@@ -271,17 +271,21 @@ event.on('message-new', async(chat) =>{
                 wa.sendReplyWA(to, "Hey @!", "HujanAPI.xyz", [sender])
         }else if (cmd == "mode public"){
             if (owner.includes(sender)){
-                wa.sendReply(to, 'Mode Public already active')
-            } else {
-                wait.Modepublic.status = true
-                wa.sendReply(to, 'Success activated Mode Public')
+                if (wait.Modepublic.status == true){
+                    wa.sendReply(to, 'Mode Public already active')
+                } else {
+                    wait.Modepublic.status = true
+                    wa.sendReply(to, 'Success activated Mode Public')
+                }
             }
         } else if (cmd == "mode self"){
             if (owner.includes(sender)){
-                wa.sendReply(to, 'Mode Self already active')
-            } else {
-                wait.Modepublic.status = false
-                wa.sendReply(to, 'Success activated Mode Self')
+                if (wait.Modepublic.status == false){
+                    wa.sendReply(to, 'Mode Self already active')
+                } else {
+                    wait.Modepublic.status = false
+                    wa.sendReply(to, 'Success activated Mode Self')
+                }
             }
         } else if (cmd === "me"){
             if (!modecmd(sender)) return
