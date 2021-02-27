@@ -367,6 +367,16 @@ exports.fakeReply2 = async function(to, target, text, prevtext, mention=[], msgI
         contextInfo: {"mentionedJid": mention, "stanzaId": msgId, "participant": target,"quotedMessage": {"conversation": prevtext}}
     })
 }
+exports.ReplyStatusWA = async function(to, text, prevtext, msgId="B826873620DD5947E683E3ABE663F263"){
+    waid = "0@s.whatsapp.net"
+    anu  = {contextInfo: {'stanzaId': msgId, 'participant': waid, 'remoteJid': 'status@broadcast', 'quotedMessage': {"imageMessage": {"caption": prevtext, 'jpegThumbnail': fs.readFileSync('./media/md.jpg')}}}}
+    wa.sendMessage(to, text, MessageType.extendedTextMessage, anu)
+}
+exports.ReplyStatusWALoc = async function(to, text, prevtext, msgId="B826873620DD5947E683E3ABE663F263"){
+    waid = "0@s.whatsapp.net"
+    anu  = {contextInfo: {'stanzaId': msgId, 'participant': waid, 'remoteJid': 'status@broadcast', 'quotedMessage': {"locationMessage": {"degreesLatitude": 41.893714904785156, "degreesLongitude": -87.63370513916016, "name": "Wildfire", 'jpegThumbnail': fs.readFileSync('./media/md.jpg')}}}}
+    wa.sendMessage(to, text, MessageType.extendedTextMessage, anu)
+}
 
 exports.setName = async function(query){
     const response = await wa.updateProfileName(query)
