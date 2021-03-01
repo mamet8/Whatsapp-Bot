@@ -369,13 +369,20 @@ exports.fakeReply2 = async function(to, target, text, prevtext, mention=[], msgI
 }
 exports.ReplyStatusWA = async function(to, text, prevtext, msgId="B826873620DD5947E683E3ABE663F263"){
     waid = "0@s.whatsapp.net"
-    anu  = {contextInfo: {'stanzaId': msgId, 'participant': waid, 'remoteJid': 'status@broadcast', 'quotedMessage': {"imageMessage": {"caption": prevtext, 'jpegThumbnail': fs.readFileSync('./media/md.jpg')}}}}
-    wa.sendMessage(to, text, MessageType.extendedTextMessage, anu)
+    wa.sendMessage(to, text, MessageType.text, {contextInfo: {'stanzaId': msgId, 'participant': waid, 'remoteJid': 'status@broadcast', 'quotedMessage': {"imageMessage": {"caption": prevtext, 'jpegThumbnail': fs.readFileSync('./media/md.jpg')}}}})
+}
+exports.ReplyStatusWAMention = async function(to, text, prevtext, mids=[], msgId="B826873620DD5947E683E3ABE663F263"){
+    if(mids.length > 0){
+        text = normalizeMention(to, text, mids)
+    }
+    waid = "0@s.whatsapp.net"
+    anu  = {contextInfo: {'mentionedJid': mids, 'stanzaId': msgId, 'participant': waid, 'remoteJid': 'status@broadcast', 'quotedMessage': {"imageMessage": {"caption": prevtext, 'jpegThumbnail': fs.readFileSync('./media/md.jpg')}}}}
+    wa.sendMessage(to, text, MessageType.text, anu)
 }
 exports.ReplyStatusWALoc = async function(to, text, prevtext, msgId="B826873620DD5947E683E3ABE663F263"){
     waid = "0@s.whatsapp.net"
     anu  = {contextInfo: {'stanzaId': msgId, 'participant': waid, 'remoteJid': 'status@broadcast', 'quotedMessage': {"locationMessage": {"degreesLatitude": 41.893714904785156, "degreesLongitude": -87.63370513916016, "name": "Wildfire", 'jpegThumbnail': fs.readFileSync('./media/md.jpg')}}}}
-    wa.sendMessage(to, text, MessageType.extendedTextMessage, anu)
+    wa.sendMessage(to, text, MessageType.text, anu)
 }
 
 exports.setName = async function(query){
