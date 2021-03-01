@@ -51,6 +51,9 @@ var wait = {
             status: false,
             GROUP: [],
             message: {}
+        },
+        groupchange:{
+            status: false
         }
     }
 }
@@ -94,7 +97,24 @@ event.on('message-new', async(chat) =>{
     const args = cmd.split(' ')
 
 //============================================================
-
+    if (wait.responder.groupchange.status){ 
+        if (msg.messageStubType === 'GROUP_CHANGE_DESCRIPTION'){
+            const pict = await wa.getPict(to)
+            wa.ReplyStatusWAMention(to, "Group description has been changed by @!", "Group-Update", [sender])
+        }
+        if (msg.messageStubType === 'GROUP_CHANGE_SUBJECT'){
+            const pict = await wa.getPict(to)
+            wa.ReplyStatusWAMention(to, "Group subject has been changed by @!", "Group-Update", [sender])
+        }
+        if (msg.messageStubType === 'GROUP_CHANGE_ICON'){
+            wa.ReplyStatusWAMention(to, "Group icon has been changed by @!", "Group-Update", [sender])
+        }
+        if (wait.gAutoRead.status){
+            if (msg.isGroup){
+                event.chatRead(to)
+            }
+        }
+    }
     if (wait.gAutoRead.status){
         if (msg.isGroup){
             event.chatRead(to)
@@ -131,6 +151,7 @@ event.on('message-new', async(chat) =>{
                 const mat = await code.json()
                 wa.sendMediaURL(to,mat.result)
             }
+            printLogs(msg)
         } else if (cmd == "totext"){
             if (Object.keys(msg.quoted)[0] === "audioMessage") {
                 msg.message = msg.quoted
@@ -352,6 +373,7 @@ event.on('message-new', async(chat) =>{
             mat += '⤷ Autoread\n'
             mat += '⤷ Respontag\n'
             mat += '⤷ Responpm\n'
+            mat += '⤷ Respongroupupdate\n'
             mat += '⤷ Welcome\n'
             mat += '⤷ Leave\n'
             mat += '\n'
@@ -1885,12 +1907,42 @@ event.on('message-new', async(chat) =>{
                     wa.sendMessage(to, "Responpm already deactive")
                 } else {
                     wait.responder.pm.status = false
-                    wait.responder.pm.GROUP.splice(to)
                     wa.sendMessage(to, "Success deactivated Responpm")
                 }
             } else {
                 wait.responder.pm.message = xtext
                 wa.sendMessage(to, ' 「 Auto Respon 」\nResponpm has been set to:\n_'+wait.responder.welcome.message[to]+'_ \nTo: *'+g.subject+'*')
+            }
+            printLogs(msg)
+            
+        } else if (cmd.startsWith("respongroupupdate")) {
+            if (!modecmd(sender)) return
+            var sep = text.split(' ')
+            const xtext = text.replace(sep[0] + " ", "")
+            cond = xtext.split(" ")
+            let res = "╭───「 Respongroupupdate 」"
+            res += "\n├ Status : " + wait.responder.groupchange.status
+            res += "\n├ Usage : "
+            res += "\n│ • Respongroupupdate"
+            res += "\n│ • Respongroupupdate <on/off>"
+            res += "\n╰───「 Hello World 」"
+            if (cmd == "respongroupupdate") { 
+                wa.sendMessage(to, res)
+            } else if (cond[0].toLowerCase() == "on") {
+                if (wait.responder.groupchange.status == true){
+                    wa.sendMessage(to, `Responpm already active`)
+                } else {
+                    wait.responder.groupchange.status = true
+                    wait.responder.groupchange.message = "Apaan tod"
+                    wa.sendMessage(to, `Success activated Responpm`)
+                }
+            } else if (cond[0].toLowerCase() == "off") {
+                if (wait.responder.groupchange.status == false){
+                    wa.sendMessage(to, "Responpm already deactive")
+                } else {
+                    wait.responder.groupchange.status = false
+                    wa.sendMessage(to, "Success deactivated Responpm")
+                }
             }
             printLogs(msg)
         
