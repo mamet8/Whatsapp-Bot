@@ -4,12 +4,30 @@
 
 ___
 
-### Installation
+### For Termux
+```bash
+> pkg update && pkg upgrade
+> pkg install git -y
+> pkg install nodejs -y
+> pkg install ffmpeg -y
+> git clone https://github.com/mamet8/Whatsapp-Bot
+> cd Whatsapp-Bot
+> npm i
+```
+
+### Run
+```
+> npm start
+```
+
+___
+
+### For VPS
 ```bash
 > npm i
 ```
 
-### Usage
+### Run
 ```bash
 > npm start
 ```
