@@ -108,6 +108,30 @@ event.on('message-new', async(chat) =>{
                 fs.unlinkSync(file)
             }
             printLogs(msg)
+        } else if (cmd == "setfakestatus"){
+            if (Object.keys(msg.quoted)[0] === "imageMessage"){
+                msg.message = msg.quoted
+                await event.downloadAndSaveMediaMessage(msg, "./media/pictfakestatus")
+                setting.pictFakestatus = "./media/pictfakestatus.jpeg"
+                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                wa.sendReply(to, "succes")
+            }
+        } else if (cmd == "setfakethumb"){
+            if (Object.keys(msg.quoted)[0] === "imageMessage"){
+                msg.message = msg.quoted
+                await event.downloadAndSaveMediaMessage(msg, "./media/pictfakethumb")
+                setting.pictFakethumb = "./media/pictfakestatus.jpeg"
+                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                wa.sendReply(to, "succes")
+            }
+        } else if (cmd == "setpictdeface"){
+            if (Object.keys(msg.quoted)[0] === "imageMessage"){
+                msg.message = msg.quoted
+                await event.downloadAndSaveMediaMessage(msg, "./media/pictfakestatus")
+                setting.pictDeface = "./media/pictdeface.jpeg"
+                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                wa.sendReply(to, "succes")
+            }
         } else if (cmd == "to sscode"){
             if (Object.keys(msg.quoted)[0] === "conversation"){
                 xtext = msg.quoted.conversation
@@ -413,6 +437,9 @@ event.on('message-new', async(chat) =>{
             mat += '⤷ Set Picture\n'
             mat += '⤷ Set Pictgroup\n'
             mat += '⤷ Img2url\n'
+            mat += '⤷ Setfakethumb <img>\n'
+            mat += '⤷ Setpictdeface <img>\n'
+            mat += '⤷ Setfakestatus <img>\n'
             mat += '⤷ Totext\n'
             mat += '⤷ To sscode\n'
             mat += '⤷ To Hidetag <img/sticker>\n'
