@@ -367,21 +367,24 @@ exports.fakeReply2 = async function(to, target, text, prevtext, mention=[], msgI
         contextInfo: {"mentionedJid": mention, "stanzaId": msgId, "participant": target,"quotedMessage": {"conversation": prevtext}}
     })
 }
-exports.ReplyStatusWA = async function(to, text, prevtext, msgId="B826873620DD5947E683E3ABE663F263"){
+exports.ReplyStatusWA = async function(to, text, prevtext, filename, msgId="B826873620DD5947E683E3ABE663F263"){
     waid = "0@s.whatsapp.net"
-    wa.sendMessage(to, text, MessageType.text, {contextInfo: {'stanzaId': msgId, 'participant': waid, 'remoteJid': 'status@broadcast', 'quotedMessage': {"imageMessage": {"caption": prevtext, 'jpegThumbnail': fs.readFileSync('./media/md.jpg')}}}})
+    wa.sendMessage(to, text, MessageType.text, {contextInfo: {'stanzaId': msgId, 'participant': waid, 'remoteJid': 'status@broadcast', 'quotedMessage': {"imageMessage": {"caption": prevtext, 'jpegThumbnail': fs.readFileSync(filename)}}}})
 }
-exports.ReplyStatusWAMention = async function(to, text, prevtext, mids=[], msgId="B826873620DD5947E683E3ABE663F263"){
+exports.ReplyFakeStatus = async function(to, text, prevtext, jid, filename, msgId="B826873620DD5947E683E3ABE663F263"){
+    wa.sendMessage(to, text, MessageType.text, {contextInfo: {'stanzaId': msgId, 'participant': jid, 'remoteJid': 'status@broadcast', 'quotedMessage': {"imageMessage": {"caption": prevtext, 'jpegThumbnail': fs.readFileSync(filename)}}}})
+}
+exports.ReplyStatusWAMention = async function(to, text, prevtext, filename, mids=[], msgId="B826873620DD5947E683E3ABE663F263"){
     if(mids.length > 0){
         text = normalizeMention(to, text, mids)
     }
     waid = "0@s.whatsapp.net"
-    anu  = {contextInfo: {'mentionedJid': mids, 'stanzaId': msgId, 'participant': waid, 'remoteJid': 'status@broadcast', 'quotedMessage': {"imageMessage": {"caption": prevtext, 'jpegThumbnail': fs.readFileSync('./media/md.jpg')}}}}
+    anu  = {contextInfo: {'mentionedJid': mids, 'stanzaId': msgId, 'participant': waid, 'remoteJid': 'status@broadcast', 'quotedMessage': {"imageMessage": {"caption": prevtext, 'jpegThumbnail': fs.readFileSync(filename)}}}}
     wa.sendMessage(to, text, MessageType.text, anu)
 }
-exports.ReplyStatusWALoc = async function(to, text, prevtext, msgId="B826873620DD5947E683E3ABE663F263"){
+exports.ReplyStatusWALoc = async function(to, text, prevtext, filename, msgId="B826873620DD5947E683E3ABE663F263"){
     waid = "0@s.whatsapp.net"
-    anu  = {contextInfo: {'stanzaId': msgId, 'participant': waid, 'remoteJid': 'status@broadcast', 'quotedMessage': {"locationMessage": {"degreesLatitude": 41.893714904785156, "degreesLongitude": -87.63370513916016, "name": "Wildfire", 'jpegThumbnail': fs.readFileSync('./media/md.jpg')}}}}
+    anu  = {contextInfo: {'stanzaId': msgId, 'participant': waid, 'remoteJid': 'status@broadcast', 'quotedMessage': {"locationMessage": {"degreesLatitude": 41.893714904785156, "degreesLongitude": -87.63370513916016, "name": "Wildfire", 'jpegThumbnail': fs.readFileSync(filename)}}}}
     wa.sendMessage(to, text, MessageType.text, anu)
 }
 
