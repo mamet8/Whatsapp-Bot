@@ -78,12 +78,12 @@ async function printLogs(msg){
     const to = msg.key.remoteJid
     const msg_id = msg.key.id
     const args = cmd.split(' ')
-    const gc = await event.groupMetadata(to)
     tmp_hit.push(cmd)
     if(!msg.isGroup){
         console.log(clc.green("[ CMD ] "), clc.yellow(time), clc.green(text), 'form', clc.green(event.contacts[sender].notify));
     } else {
-        console.log(clc.green("[ CMD ] "), clc.yellow(time), clc.green(text), 'form', clc.green(event.contacts[sender].notify), 'to', clc.yellow(gc.subject));
+        const gc = await wa.getGroup(to)
+        console.log(clc.green("[ CMD ] "), clc.yellow(time), clc.green(text), 'form', clc.green(event.contacts[sender].notify), 'To', clc.yellow(gc.subject));
     }
 }
 
