@@ -273,7 +273,7 @@ event.on('message-new', async(chat) =>{
             }else{
                 respon_pm[sender] = 1
             }
-            wa.sendMessage(to, setting.responder.pm)
+            wa.sendMessage(to, setting.responder.pm.message)
         }
     }
     if (chat){
