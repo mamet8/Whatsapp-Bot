@@ -18,48 +18,16 @@ const { GroupSettingChange } = require("@adiwajshing/baileys");
 conn.connectToWhatsApp()
 const event = conn.Whatsapp
 
+const setting = JSON.parse(fs.readFileSync('./settings.json'))
+
 const APIKUY = "Chat me for Apikey https://wa.me/6281396061030"
 var tmp_ids = []
 var tmp_hit = []
 var respon_tag = {}
 var respon_pm = {}
-var wait = {
-    Modepublic: {
-        status: true
-    },
-    pmAutoRead: {
-        status: false
-    },
-    gAutoRead: {
-        status: false
-    },
-    responder: {
-        tag: {
-            status: false,
-            GROUP: [],
-            message: {}
-        },
-        pm: {
-            status: false,
-            message: "apa tod"
-        },
-        welcome: {
-            status: false,
-            GROUP: [],
-            message: {}
-        },
-        leave: {
-            status: false,
-            GROUP: [],
-            message: {}
-        },
-        groupchange:{
-            status: false
-        }
-    }
-}
+
 function modecmd(sender){
-    if(wait.Modepublic.status){
+    if(setting.Modepublic.status){
         return true
     }else{
         if(sender === event.user.jid){
@@ -98,7 +66,7 @@ event.on('message-new', async(chat) =>{
     const args = cmd.split(' ')
 
 //============================================================
-    if (wait.responder.groupchange.status){ 
+    if (setting.responder.groupchange.status){ 
         if (msg.messageStubType === 'GROUP_CHANGE_DESCRIPTION'){
             const pict = await wa.getPict(to)
             wa.ReplyStatusWAMention(to, "Group description has been changed by @!", "Group-Update", [sender])
@@ -110,18 +78,13 @@ event.on('message-new', async(chat) =>{
         if (msg.messageStubType === 'GROUP_CHANGE_ICON'){
             wa.ReplyStatusWAMention(to, "Group icon has been changed by @!", "Group-Update", [sender])
         }
-        if (wait.gAutoRead.status){
-            if (msg.isGroup){
-                event.chatRead(to)
-            }
-        }
     }
-    if (wait.gAutoRead.status){
+    if (setting.gAutoRead.status){
         if (msg.isGroup){
             event.chatRead(to)
         }
     }
-    if (wait.pmAutoRead.status){
+    if (setting.pmAutoRead.status){
         if (!msg.isGroup){
             event.chatRead(to)
         }
@@ -264,20 +227,21 @@ event.on('message-new', async(chat) =>{
             }
         }
     }
-    if (wait.responder.tag.status){
+    if (setting.responder.tag.status){
         if (msg.mentionedJid){
             if (msg.mentionedJid.includes(event.user.jid)){
+                if (event.user.jid.includes(sender)) return
                 if(respon_tag[sender]){
                     if(respon_tag[sender] > 0){return}
                     respon_tag[sender] += 1
                 }else{
                     respon_tag[sender] = 1
                 }
-                wa.sendMessage(to, wait.responder.tag.message[to])
+                wa.sendMessage(to, setting.responder.tag.message[to])
             } 
         }
     }
-    if (wait.responder.pm.status){
+    if (setting.responder.pm.status){
         if (!msg.isGroup){
             if(respon_pm[sender]){
                 if(respon_pm[sender] > 0){return}
@@ -285,7 +249,7 @@ event.on('message-new', async(chat) =>{
             }else{
                 respon_pm[sender] = 1
             }
-            wa.sendMessage(to, wait.responder.pm)
+            wa.sendMessage(to, setting.responder.pm)
         }
     }
     if (chat){
@@ -307,19 +271,22 @@ event.on('message-new', async(chat) =>{
                 wa.sendReplyWA(to, "Hey @!", "HujanAPI.xyz", [sender])
         }else if (cmd == "mode public"){
             if (owner.includes(sender)){
-                if (wait.Modepublic.status == true){
+                if (setting.Modepublic.status = true){
                     wa.sendReply(to, 'Mode Public already active')
                 } else {
-                    wait.Modepublic.status = true
+                    setting.Modepublic.status = true
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
                     wa.sendReply(to, 'Success activated Mode Public')
                 }
             }
+            printLogs(msg)
         } else if (cmd == "mode self"){
             if (owner.includes(sender)){
-                if (wait.Modepublic.status == false){
+                if (setting.Modepublic.status == false){
                     wa.sendReply(to, 'Mode Self already active')
                 } else {
-                    wait.Modepublic.status = false
+                    setting.Modepublic.status = false
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
                     wa.sendReply(to, 'Success activated Mode Self')
                 }
             }
@@ -335,16 +302,16 @@ event.on('message-new', async(chat) =>{
         } else if (cmd === "settings"){
             if (!modecmd(sender)) return
             let mat = "*Settings*\n"
-            if (wait.responder.tag.status == true) { mat += "\n⋄ Respontag < *On* >\n  └ "+wait.responder.tag.message[to]+" < MSG >" } else if (wait.responder.tag.status == false) { mat += "\n⋄ Respontag < *Off* >\n  └ "+wait.responder.tag.message[to]+" < MSG >" }
-            if (wait.responder.pm.status == true) { mat += "\n⋄ Responpm < *On* >\n  └ "+wait.responder.pm.message+" < MSG >" } else if (wait.responder.pm.status == false) { mat += "\n⋄ Responpm < *Off* >\n  └ "+wait.responder.pm.message+" < MSG >" }
-            if (wait.responder.welcome.status == true) { mat += "\n⋄ Welcome < *On* >\n  └ "+wait.responder.welcome.message[to]+" < MSG >" } else if (wait.responder.welcome.status == false) { mat += "\n⋄ Welcome < *Off* >\n  └ "+wait.responder.welcome.message[to]+" < MSG >" }
-            if (wait.responder.leave.status == true) { mat += "\n⋄ Leave < *On* >\n  └ "+wait.responder.leave.message[to]+" < MSG >" } else if (wait.responder.leave.status == false) { mat += "\n⋄ Leave < *Off* >\n  └ "+wait.responder.leave.message[to]+" < MSG >" }
+            if (setting.responder.tag.status == true) { mat += "\n⋄ Respontag < *On* >\n  └ "+setting.responder.tag.message[to]+" < MSG >" } else if (setting.responder.tag.status == false) { mat += "\n⋄ Respontag < *Off* >\n  └ "+setting.responder.tag.message[to]+" < MSG >" }
+            if (setting.responder.pm.status == true) { mat += "\n⋄ Responpm < *On* >\n  └ "+setting.responder.pm.message+" < MSG >" } else if (setting.responder.pm.status == false) { mat += "\n⋄ Responpm < *Off* >\n  └ "+setting.responder.pm.message+" < MSG >" }
+            if (setting.responder.welcome.status == true) { mat += "\n⋄ Welcome < *On* >\n  └ "+setting.responder.welcome.message[to]+" < MSG >" } else if (setting.responder.welcome.status == false) { mat += "\n⋄ Welcome < *Off* >\n  └ "+setting.responder.welcome.message[to]+" < MSG >" }
+            if (setting.responder.leave.status == true) { mat += "\n⋄ Leave < *On* >\n  └ "+setting.responder.leave.message[to]+" < MSG >" } else if (setting.responder.leave.status == false) { mat += "\n⋄ Leave < *Off* >\n  └ "+setting.responder.leave.message[to]+" < MSG >" }
             wa.sendReply(to, mat)
             printLogs(msg)
         } else if (cmd === "help"){
             if (!modecmd(sender)) return
             let mode = ""
-            if(wait.Modepublic.status){ mode += "Mode Public" } else if(!wait.Modepublic.status) { mode += "Mode Self" }
+            if(setting.Modepublic.status){ mode += "Mode Public" } else if(!setting.Modepublic.status) { mode += "Mode Self" }
             const cr1 = '6281396061030@s.whatsapp.net'
             const cr2 = '6282260888474@s.whatsapp.net'
             let mat = '*< Help Messages >*\n\n'
@@ -1686,8 +1653,6 @@ event.on('message-new', async(chat) =>{
             cond = xtext.split(" ")
             g = await wa.getGroup(to)
             let res = "╭───「 Auto OnlyadminMsg 」"
-            res += "\n├ Status : " + wait.responder.tag.status
-            res += "\n├ Message : " + wait.responder.tag.message[to]
             res += "\n├ Usage : "
             res += "\n│ • Onlyadminmsg"
             res += "\n│ • Onlyadminmsg <on/off>"
@@ -1714,8 +1679,8 @@ event.on('message-new', async(chat) =>{
             textt = xtext.toLowerCase()
             let res = "╭───「 Auto Read 」"
             res += "\n├ Status : "
-            res += "\n│ • PM : " +wait.pmAutoRead.status
-            res += "\n│ • Group : " +wait.gAutoRead.status
+            res += "\n│ • PM : " +setting.pmAutoRead.status
+            res += "\n│ • Group : " +setting.gAutoRead.status
             res += "\n├ Usage : "
             res += "\n│ • autoread"
             res += "\n│ • autoread pm <on/off>"
@@ -1724,31 +1689,35 @@ event.on('message-new', async(chat) =>{
             if (cmd == "autoread") { 
                 wa.sendMessage(to, res)
             } else if (textt == "pm on") {
-                if (wait.pmAutoRead.status){
+                if (setting.pmAutoRead.status == true){
                     wa.sendMessage(to, "Auto Read already active in PM")
                 } else {
-                    wait.pmAutoRead.status = true
+                    setting.pmAutoRead.status = true
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
                     wa.sendMessage(to, "Success activated Auto Read in PM")
                 }
             } else if (textt == "pm off") {
-                if (wait.pmAutoRead.status){
+                if (setting.pmAutoRead.status == false){
                     wa.sendMessage(to, "Auto Read already deactive in PM")
                 } else {
-                    wait.pmAutoRead.status = false
+                    setting.pmAutoRead.status = false
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
                     wa.sendMessage(to, "Success deactivated Auto Read in PM")
                 }
             } else if (textt == "group on") {
-                if (wait.gAutoRead.status){
+                if (setting.gAutoRead.status == true){
                     wa.sendMessage(to, "Auto Read already active on Group")
                 } else {
-                    wait.gAutoRead.status = true
+                    setting.gAutoRead.status = true
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
                     wa.sendMessage(to, "Success activated Auto Read on Group")
                 }
             } else if (textt == "group off") {
-                if (wait.gAutoRead.status){
+                if (setting.gAutoRead.status == false){
                     wa.sendMessage(to, "Auto Read already deactive on Group")
                 } else {
-                    wait.gAutoRead.status = false
+                    setting.gAutoRead.status = false
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
                     wa.sendMessage(to, "Success deactivated Auto Read on Group")
                 }
             }
@@ -1762,8 +1731,8 @@ event.on('message-new', async(chat) =>{
             cond = xtext.split(" ")
             g = await wa.getGroup(to)
             let res = "╭───「 Auto Respon Tag 」"
-            res += "\n├ Status : " + wait.responder.tag.status
-            res += "\n├ Message : " + wait.responder.tag.message[to]
+            res += "\n├ Status : " + setting.responder.tag.status
+            res += "\n├ Message : " + setting.responder.tag.message[to]
             res += "\n├ Usage : "
             res += "\n│ • Respontag"
             res += "\n│ • Respontag <on/off>"
@@ -1772,28 +1741,28 @@ event.on('message-new', async(chat) =>{
             if (cmd == "respontag") { 
                 wa.sendMessage(to, res)
             } else if (cond[0].toLowerCase() == "on") {
-                if (wait.responder.tag.status){
-                    wait.responder.tag.GROUP.push(to)
-                    wait.responder.tag.message[to] = "ada apa?"
+                if (setting.responder.tag.status == true){
                     wa.sendMessage(to, `Auto Respon Tag already active *${g.subject}*`)
                 } else {
-                    wait.responder.tag.status = true
-                    wait.responder.tag.GROUP.push(to)
-                    wait.responder.tag.message[to] = "ada apa?"
+                    setting.responder.tag.status = true
+                    setting.responder.tag.GROUP.push(to)
+                    setting.responder.tag.message[to] = "ada apa?"
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
                     wa.sendMessage(to, `Success activated Auto Respon Tag *${g.subject}*`)
                 }
             } else if (cond[0].toLowerCase() == "off") {
-                if (wait.responder.tag.status){
-                    wait.responder.tag.GROUP.splice(to)
+                if (setting.responder.tag.status == false){
                     wa.sendMessage(to, "Auto Respon Tag already deactive *"+g.subject+"*")
                 } else {
-                    wait.responder.tag.status = false
-                    wait.responder.tag.GROUP.splice(to)
-                    wa.sendMessage(to, "Success deactivated Auto Respon Tag *"+g.subject+"*")
+                    setting.responder.tag.status = false
+                    setting.responder.tag.GROUP.splice(to)
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    wa.sendMessage(to, "Success deactivated Auto Respon Welcome *"+g.subject+"*")
                 }
             } else {
-                wait.responder.tag.message[to] = xtext
-                wa.sendMessage(to, ' 「 Auto Respon 」\nAuto Respon Tag has been set to:\n_'+wait.responder.tag.message[to]+'_ \nTo: *'+g.subject+'*')
+                setting.responder.tag.message[to] = xtext
+                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                wa.sendMessage(to, ' 「 Auto Respon 」\nAuto Respon Tag has been set to:\n_'+setting.responder.tag.message[to]+'_ \nTo: *'+g.subject+'*')
             }
             printLogs(msg)
         } else if (cmd.startsWith("welcome")) {
@@ -1804,8 +1773,8 @@ event.on('message-new', async(chat) =>{
             cond = xtext.split(" ")
             g = await wa.getGroup(to)
             let res = "╭───「 Welcome 」"
-            res += "\n├ Status : " + wait.responder.welcome.status
-            res += "\n├ Message : " + wait.responder.welcome.message[to]
+            res += "\n├ Status : " + setting.responder.welcome.status
+            res += "\n├ Message : " + setting.responder.welcome.message[to]
             res += "\n├ Usage : "
             res += "\n│ • Welcome"
             res += "\n│ • Welcome <on/off>"
@@ -1814,28 +1783,28 @@ event.on('message-new', async(chat) =>{
             if (cmd == "welcome") { 
                 wa.sendMessage(to, res)
             } else if (cond[0].toLowerCase() == "on") {
-                if (wait.responder.welcome.status){
-                    wait.responder.welcome.GROUP.push(to)
-                    wait.responder.welcome.message[to] = "Welcome @!"
+                if (setting.responder.welcome.status == true){
                     wa.sendMessage(to, `Auto Respon Welcome already active *${g.subject}*`)
                 } else {
-                    wait.responder.welcome.status = true
-                    wait.responder.welcome.GROUP.push(to)
-                    wait.responder.welcome.message[to] = "Welcome @!"
+                    setting.responder.welcome.status = true
+                    setting.responder.welcome.GROUP.push(to)
+                    setting.responder.welcome.message[to] = "Welcome @!"
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
                     wa.sendMessage(to, `Success activated Auto Respon Welcome *${g.subject}*`)
                 }
             } else if (cond[0].toLowerCase() == "off") {
-                if (wait.responder.welcome.status){
-                    wait.responder.welcome.GROUP.splice(to)
+                if (setting.responder.welcome.status = false){
                     wa.sendMessage(to, "Auto Respon Welcome already deactive *"+g.subject+"*")
                 } else {
-                    wait.responder.welcome.status = false
-                    wait.responder.welcome.GROUP.splice(to)
+                    setting.responder.welcome.status = false
+                    setting.responder.welcome.GROUP.splice(to)
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
                     wa.sendMessage(to, "Success deactivated Auto Respon Welcome *"+g.subject+"*")
                 }
             } else {
-                wait.responder.welcome.message[to] = xtext
-                wa.sendMessage(to, ' 「 Auto Respon 」\nAuto Respon Welcome has been set to:\n_'+wait.responder.welcome.message[to]+'_ \nTo: *'+g.subject+'*')
+                setting.responder.welcome.message[to] = xtext
+                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                wa.sendMessage(to, ' 「 Auto Respon 」\nAuto Respon Welcome has been set to:\n_'+setting.responder.welcome.message[to]+'_ \nTo: *'+g.subject+'*')
             }
             printLogs(msg)
         } else if (cmd.startsWith("leave")) {
@@ -1846,8 +1815,8 @@ event.on('message-new', async(chat) =>{
             cond = xtext.split(" ")
             g = await wa.getGroup(to)
             let res = "╭───「 Leave 」"
-            res += "\n├ Status : "+wait.responder.leave.status
-            res += "\n├ Message : " +wait.responder.leave.message[to]
+            res += "\n├ Status : "+setting.responder.leave.status
+            res += "\n├ Message : " +setting.responder.leave.message[to]
             res += "\n├ Usage : "
             res += "\n│ • Leave"
             res += "\n│ • Leave <on/off>"
@@ -1856,28 +1825,28 @@ event.on('message-new', async(chat) =>{
             if (cmd == "leave") { 
                 wa.sendMessage(to, res)
             } else if (cond[0].toLowerCase() == "on") {
-                if (wait.responder.leave.status){
-                    wait.responder.leave.GROUP.push(to)
-                    wait.responder.leave.message[to] = "Sayonara @!"
+                if (setting.responder.leave.status == true){
                     wa.sendMessage(to, `Auto Respon Leave already active *${g.subject}*`)
                 } else {
-                    wait.responder.leave.status = true
-                    wait.responder.leave.GROUP.push(to)
-                    wait.responder.leave.message[to] = "Sayonara @!"
+                    setting.responder.leave.status = true
+                    setting.responder.leave.GROUP.push(to)
+                    setting.responder.leave.message[to] = "Sayonara @!"
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
                     wa.sendMessage(to, `Success activated Auto Respon Leave *${g.subject}*`)
                 }
             } else if (cond[0].toLowerCase() == "off") {
-                if (wait.responder.leave.status){
-                    wait.responder.leave.GROUP.splice(to)
+                if (setting.responder.leave.status == false){
                     wa.sendMessage(to, "Auto Respon Leave already deactive *"+g.subject+"*")
                 } else {
-                    wait.responder.leave.status = false
-                    wait.responder.leave.GROUP.splice(to)
+                    setting.responder.leave.status = false
+                    setting.responder.leave.GROUP.splice(to)
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
                     wa.sendMessage(to, "Success deactivated Auto Respon Leave *"+g.subject+"*")
                 }
             } else {
-                wait.responder.leave.message[to] = xtext
-                wa.sendMessage(to, ' 「 Auto Respon 」\nAuto Respon Leave has been set to:\n_'+wait.responder.leave.message[to]+'_ \nTo: *'+g.subject+'*')
+                setting.responder.leave.message[to] = xtext
+                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                wa.sendMessage(to, ' 「 Auto Respon 」\nAuto Respon Leave has been set to:\n_'+setting.responder.leave.message[to]+'_ \nTo: *'+g.subject+'*')
             }
             printLogs(msg)
         } else if (cmd.startsWith("responpm")) {
@@ -1886,8 +1855,8 @@ event.on('message-new', async(chat) =>{
             const xtext = text.replace(sep[0] + " ", "")
             cond = xtext.split(" ")
             let res = "╭───「 Responpm 」"
-            res += "\n├ Status : " + wait.responder.pm.status
-            res += "\n├ Message : " + wait.responder.pm.message
+            res += "\n├ Status : " + setting.responder.pm.status
+            res += "\n├ Message : " + setting.responder.pm.message
             res += "\n├ Usage : "
             res += "\n│ • Responpm"
             res += "\n│ • Responpm <on/off>"
@@ -1896,34 +1865,36 @@ event.on('message-new', async(chat) =>{
             if (cmd == "responpm") { 
                 wa.sendMessage(to, res)
             } else if (cond[0].toLowerCase() == "on") {
-                if (wait.responder.pm.status == true){
-                    wait.responder.pm.message = "Apaan tod"
+                if (setting.responder.pm.status == true){
                     wa.sendMessage(to, `Responpm already active`)
                 } else {
-                    wait.responder.pm.status = true
-                    wait.responder.pm.message = "Apaan tod"
+                    setting.responder.pm.status = true
+                    setting.responder.pm.message = "Apaan tod"
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
                     wa.sendMessage(to, `Success activated Responpm`)
                 }
             } else if (cond[0].toLowerCase() == "off") {
-                if (wait.responder.pm.status == false){
+                if (setting.responder.pm.status == false){
                     wa.sendMessage(to, "Responpm already deactive")
                 } else {
-                    wait.responder.pm.status = false
+                    setting.responder.pm.status = false
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
                     wa.sendMessage(to, "Success deactivated Responpm")
                 }
             } else {
-                wait.responder.pm.message = xtext
-                wa.sendMessage(to, ' 「 Auto Respon 」\nResponpm has been set to:\n_'+wait.responder.welcome.message[to]+'_ \nTo: *'+g.subject+'*')
+                setting.responder.pm.message = xtext
+                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                wa.sendMessage(to, ' 「 Auto Respon 」\nResponpm has been set to:\n_'+setting.responder.pm.message+'_')
             }
             printLogs(msg)
-            
+
         } else if (cmd.startsWith("respongroupupdate")) {
             if (!modecmd(sender)) return
             var sep = text.split(' ')
             const xtext = text.replace(sep[0] + " ", "")
             cond = xtext.split(" ")
             let res = "╭───「 Respongroupupdate 」"
-            res += "\n├ Status : " + wait.responder.groupchange.status
+            res += "\n├ Status : " + setting.responder.groupchange.status
             res += "\n├ Usage : "
             res += "\n│ • Respongroupupdate"
             res += "\n│ • Respongroupupdate <on/off>"
@@ -1931,24 +1902,24 @@ event.on('message-new', async(chat) =>{
             if (cmd == "respongroupupdate") { 
                 wa.sendMessage(to, res)
             } else if (cond[0].toLowerCase() == "on") {
-                if (wait.responder.groupchange.status == true){
-                    wa.sendMessage(to, `Responpm already active`)
+                if (setting.responder.groupchange.status == true){
+                    wa.sendMessage(to, `Respongroupupdate already active`)
                 } else {
-                    wait.responder.groupchange.status = true
-                    wait.responder.groupchange.message = "Apaan tod"
-                    wa.sendMessage(to, `Success activated Responpm`)
+                    setting.responder.groupchange.status = true
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    wa.sendMessage(to, `Success activated Respongroupupdate`)
                 }
             } else if (cond[0].toLowerCase() == "off") {
-                if (wait.responder.groupchange.status == false){
-                    wa.sendMessage(to, "Responpm already deactive")
+                if (setting.responder.groupchange.status == false){
+                    wa.sendMessage(to, "Respongroupupdate already deactive")
                 } else {
-                    wait.responder.groupchange.status = false
-                    wa.sendMessage(to, "Success deactivated Responpm")
+                    setting.responder.groupchange.status = false
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    wa.sendMessage(to, "Success deactivated Respongroupupdate")
                 }
             }
             printLogs(msg)
         
-
 //============[ ANIME ]============\\
         } else if (cmd == "randomloli") {
             if (!modecmd(sender)) return
@@ -2009,20 +1980,20 @@ event.on('group-participants-update', async (chat) => {
     try {
         const group = await wa.getGroup(chat.jid)
         mem = chat.participants[0]
-        if (wait.responder.welcome.status){
+        if (setting.responder.welcome.status){
             if (chat.action == 'add') {
                 mem = chat.participants[0]
                 photo = await wa.getPict(mem)
                 //pesan = `Halo @! \nSelamat datang di group *${group.subject}*`
-                pesan = wait.responder.welcome.message[to]
+                pesan = setting.responder.welcome.message[group.id]
                 wa.sendMediaURL(group.id, photo, pesan, [mem])
             }
         }
-        if (wait.responder.leave.status){
+        if (setting.responder.leave.status){
             if (chat.action == 'remove') {
                 mem = chat.participants[0]
                 photo = await wa.getPict(mem)
-                pesan = wait.responder.leave.message[to]
+                pesan = setting.responder.leave.message[group.id]
                 wa.sendMediaURL(group.id, photo, pesan, [mem])
             }
         }
