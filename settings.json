@@ -1,0 +1,42 @@
+{
+	"Modepublic": {
+		"status": false
+	},
+	"pmAutoRead": {
+		"status": false
+	},
+	"gAutoRead": {
+		"status": false
+	},
+	"responder": {
+		"tag": {
+			"status": false,
+			"GROUP": [],
+			"message": {}
+		},
+		"pm": {
+			"status": true,
+			"message": "Apaan tod"
+		},
+		"welcome": {
+			"status": true,
+			"GROUP": [
+				"6281396061030-1609782341@g.us"
+			],
+			"message": {
+				"6281396061030-1609782341@g.us": "Hi welcome @!"
+			}
+		},
+		"leave": {
+			"status": false,
+			"GROUP": [],
+			"message": {}
+		},
+		"groupchange": {
+			"status": false
+		}
+	},
+	"pictFakestatus": "./media/md.jpg",
+	"pictFakethumb": "./media/md.jpg",
+	"pictDeface": "./media/md.jpg"
+}
