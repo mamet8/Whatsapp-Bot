@@ -20,6 +20,7 @@ const event = conn.Whatsapp
 
 const APIKUY = "Chat me for Apikey https://wa.me/6281396061030"
 var tmp_ids = []
+var tmp_hit = []
 var respon_tag = {}
 var respon_pm = {}
 var wait = {
@@ -78,6 +79,7 @@ async function printLogs(msg){
     const msg_id = msg.key.id
     const args = cmd.split(' ')
     const gc = await event.groupMetadata(to)
+    tmp_hit.push(cmd)
     if(!msg.isGroup){
         console.log(clc.green("[ CMD ] "), clc.yellow(time), clc.green(text), 'form', clc.green(event.contacts[sender].notify));
     } else {
@@ -347,7 +349,8 @@ event.on('message-new', async(chat) =>{
             const cr1 = '6281396061030@s.whatsapp.net'
             const cr2 = '6282260888474@s.whatsapp.net'
             let mat = '*< Help Messages >*\n\n'
-            mat += `_${mode}_\n\n`
+            mat += `_${mode}_\n`
+            mat += `_Total Hit_ *${tmp_hit.length}*\n\n`
             mat += '_Creator:_\n'
             mat += '1. @!\n'
             mat += '2. @!\n'
