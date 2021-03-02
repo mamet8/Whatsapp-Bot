@@ -1758,8 +1758,6 @@ event.on('message-new', async(chat) =>{
             cond = xtext.split(" ")
             g = await wa.getGroup(to)
             let res = "╭───「 Auto Respon Tag 」"
-            res += "\n├ Status : " + setting.responder.tag.status
-            res += "\n├ Message : " + setting.responder.tag.message[to]
             res += "\n├ Usage : "
             res += "\n│ • Respontag"
             res += "\n│ • Respontag <on/off>"
@@ -1784,7 +1782,7 @@ event.on('message-new', async(chat) =>{
                     setting.responder.tag.status = false
                     setting.responder.tag.GROUP.splice(to)
                     fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
-                    wa.sendMessage(to, "Success deactivated Auto Respon Welcome *"+g.subject+"*")
+                    wa.sendMessage(to, "Success deactivated Auto Respon Tag *"+g.subject+"*")
                 }
             } else {
                 setting.responder.tag.message[to] = xtext
@@ -1800,8 +1798,6 @@ event.on('message-new', async(chat) =>{
             cond = xtext.split(" ")
             g = await wa.getGroup(to)
             let res = "╭───「 Welcome 」"
-            res += "\n├ Status : " + setting.responder.welcome.status
-            res += "\n├ Message : " + setting.responder.welcome.message[to]
             res += "\n├ Usage : "
             res += "\n│ • Welcome"
             res += "\n│ • Welcome <on/off>"
@@ -1842,8 +1838,6 @@ event.on('message-new', async(chat) =>{
             cond = xtext.split(" ")
             g = await wa.getGroup(to)
             let res = "╭───「 Leave 」"
-            res += "\n├ Status : "+setting.responder.leave.status
-            res += "\n├ Message : " +setting.responder.leave.message[to]
             res += "\n├ Usage : "
             res += "\n│ • Leave"
             res += "\n│ • Leave <on/off>"
@@ -2008,20 +2002,23 @@ event.on('group-participants-update', async (chat) => {
         const group = await wa.getGroup(chat.jid)
         mem = chat.participants[0]
         if (setting.responder.welcome.status){
-            if (chat.action == 'add') {
-                mem = chat.participants[0]
-                photo = await wa.getPict(mem)
-                //pesan = `Halo @! \nSelamat datang di group *${group.subject}*`
-                pesan = setting.responder.welcome.message[group.id]
-                wa.sendMediaURL(group.id, photo, pesan, [mem])
+            if (group.id.includes(setting.responder.welcome.group)){
+                if (chat.action == 'add') {
+                    mem = chat.participants[0]
+                    photo = await wa.getPict(mem)
+                    pesan = setting.responder.welcome.message[group.id]
+                    wa.sendMediaURL(group.id, photo, pesan, [mem])
+                }
             }
         }
         if (setting.responder.leave.status){
-            if (chat.action == 'remove') {
-                mem = chat.participants[0]
-                photo = await wa.getPict(mem)
-                pesan = setting.responder.leave.message[group.id]
-                wa.sendMediaURL(group.id, photo, pesan, [mem])
+            if (group.id.includes(setting.responder.leave.group)){
+                if (chat.action == 'remove') {
+                    mem = chat.participants[0]
+                    photo = await wa.getPict(mem)
+                    pesan = setting.responder.leave.message[group.id]
+                    wa.sendMediaURL(group.id, photo, pesan, [mem])
+                }
             }
         }
         if (chat.action == 'add') {
