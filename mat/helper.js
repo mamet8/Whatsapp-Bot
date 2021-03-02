@@ -158,7 +158,7 @@ exports.sendMediaURL = async(to, url, text="", mids=[]) =>{
 		});
 	};
     download(url, filename, async function () {
-		console.log('done');
+		//console.log('done');
 		let media = fs.readFileSync(filename)
 		let type = mime.split("/")[0]+"Message"
 		if(mime === "image/gif"){
@@ -257,7 +257,6 @@ exports.kickMember = async function(to, target=[]){
     for (i of target){
         if (!i.includes(me) && !i.includes(owner)){
             const res = await wa.groupRemove(to, [i])
-            console.log(res)
         }else{
             wa.sendMessage(to, "NOT PREMITED")
         }
@@ -271,7 +270,6 @@ exports.promoteAdmin = async function(to, target=[]){
     for (i of target){
         if (!i.includes(me) && !i.includes(owner)){
             const res = await wa.groupMakeAdmin(to, [i])
-            console.log(res)
         }else{
             wa.sendMessage(to, "NOT PREMITED")
         }
@@ -285,7 +283,6 @@ exports.demoteAdmin = async function(to, target=[]){
     for (i of target){
         if (!i.includes(me) && !i.includes(owner)){
             const res = await wa.groupDemoteAdmin(to, [i])
-            console.log(res)
         }else{
             wa.sendMessage(to, "NOT PREMITED")
         }
