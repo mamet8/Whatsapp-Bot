@@ -15,17 +15,13 @@
 			"message": {}
 		},
 		"pm": {
-			"status": true,
+			"status": false,
 			"message": "Apaan tod"
 		},
 		"welcome": {
-			"status": true,
-			"GROUP": [
-				"6281396061030-1609782341@g.us"
-			],
-			"message": {
-				"6281396061030-1609782341@g.us": "Hi welcome @!"
-			}
+			"status": false,
+			"GROUP": [],
+			"message": {}
 		},
 		"leave": {
 			"status": false,
