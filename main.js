@@ -113,7 +113,7 @@ event.on('message-new', async(chat) =>{
                 msg.message = msg.quoted
                 await event.downloadAndSaveMediaMessage(msg, "./media/pictfakestatus")
                 setting.pictFakestatus = "./media/pictfakestatus.jpeg"
-                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                 wa.sendReply(to, "succes")
             }
         } else if (cmd == "setfakethumb"){
@@ -121,7 +121,7 @@ event.on('message-new', async(chat) =>{
                 msg.message = msg.quoted
                 await event.downloadAndSaveMediaMessage(msg, "./media/pictfakethumb")
                 setting.pictFakethumb = "./media/pictfakestatus.jpeg"
-                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                 wa.sendReply(to, "succes")
             }
         } else if (cmd == "setpictdeface"){
@@ -129,7 +129,7 @@ event.on('message-new', async(chat) =>{
                 msg.message = msg.quoted
                 await event.downloadAndSaveMediaMessage(msg, "./media/pictfakestatus")
                 setting.pictDeface = "./media/pictdeface.jpeg"
-                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                 wa.sendReply(to, "succes")
             }
         } else if (cmd == "to sscode"){
@@ -267,13 +267,12 @@ event.on('message-new', async(chat) =>{
     }
     if (setting.responder.pm.status){
         if (!msg.isGroup){
-            if(respon_pm[sender]){
-                if(respon_pm[sender] > 0){return}
-                respon_pm[sender] += 1
-            }else{
-                respon_pm[sender] = 1
+            if (msg.key.fromMe === false && ! to.includes("status@broadcast")){
+                if(! respon_pm[sender]){
+                    respon_pm[sender] = true
+                    wa.sendReplyWA(to, setting.responder.pm.message, "Auto Respon", [sender])
+                }
             }
-            wa.sendMessage(to, setting.responder.pm.message)
         }
     }
     if (chat){
@@ -299,7 +298,7 @@ event.on('message-new', async(chat) =>{
                     wa.sendReply(to, 'Mode Public already active')
                 } else {
                     setting.Modepublic.status = true
-                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendReply(to, 'Success activated Mode Public')
                 }
             }
@@ -310,7 +309,7 @@ event.on('message-new', async(chat) =>{
                     wa.sendReply(to, 'Mode Self already active')
                 } else {
                     setting.Modepublic.status = false
-                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendReply(to, 'Success activated Mode Self')
                 }
             }
@@ -1720,7 +1719,7 @@ event.on('message-new', async(chat) =>{
                     wa.sendMessage(to, "Auto Read already active in PM")
                 } else {
                     setting.pmAutoRead.status = true
-                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, "Success activated Auto Read in PM")
                 }
             } else if (textt == "pm off") {
@@ -1728,7 +1727,7 @@ event.on('message-new', async(chat) =>{
                     wa.sendMessage(to, "Auto Read already deactive in PM")
                 } else {
                     setting.pmAutoRead.status = false
-                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, "Success deactivated Auto Read in PM")
                 }
             } else if (textt == "group on") {
@@ -1736,7 +1735,7 @@ event.on('message-new', async(chat) =>{
                     wa.sendMessage(to, "Auto Read already active on Group")
                 } else {
                     setting.gAutoRead.status = true
-                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, "Success activated Auto Read on Group")
                 }
             } else if (textt == "group off") {
@@ -1744,7 +1743,7 @@ event.on('message-new', async(chat) =>{
                     wa.sendMessage(to, "Auto Read already deactive on Group")
                 } else {
                     setting.gAutoRead.status = false
-                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, "Success deactivated Auto Read on Group")
                 }
             }
@@ -1772,7 +1771,7 @@ event.on('message-new', async(chat) =>{
                     setting.responder.tag.status = true
                     setting.responder.tag.GROUP.push(to)
                     setting.responder.tag.message[to] = "ada apa?"
-                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, `Success activated Auto Respon Tag *${g.subject}*`)
                 }
             } else if (cond[0].toLowerCase() == "off") {
@@ -1781,12 +1780,12 @@ event.on('message-new', async(chat) =>{
                 } else {
                     setting.responder.tag.status = false
                     setting.responder.tag.GROUP.splice(to)
-                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, "Success deactivated Auto Respon Tag *"+g.subject+"*")
                 }
             } else {
                 setting.responder.tag.message[to] = xtext
-                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                 wa.sendMessage(to, ' 「 Auto Respon 」\nAuto Respon Tag has been set to:\n_'+setting.responder.tag.message[to]+'_ \nTo: *'+g.subject+'*')
             }
             printLogs(msg)
@@ -1812,7 +1811,7 @@ event.on('message-new', async(chat) =>{
                     setting.responder.welcome.status = true
                     setting.responder.welcome.GROUP.push(to)
                     setting.responder.welcome.message[to] = "Welcome @!"
-                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, `Success activated Auto Respon Welcome *${g.subject}*`)
                 }
             } else if (cond[0].toLowerCase() == "off") {
@@ -1821,12 +1820,12 @@ event.on('message-new', async(chat) =>{
                 } else {
                     setting.responder.welcome.status = false
                     setting.responder.welcome.GROUP.splice(to)
-                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, "Success deactivated Auto Respon Welcome *"+g.subject+"*")
                 }
             } else {
                 setting.responder.welcome.message[to] = xtext
-                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                 wa.sendMessage(to, ' 「 Auto Respon 」\nAuto Respon Welcome has been set to:\n_'+setting.responder.welcome.message[to]+'_ \nTo: *'+g.subject+'*')
             }
             printLogs(msg)
@@ -1852,7 +1851,7 @@ event.on('message-new', async(chat) =>{
                     setting.responder.leave.status = true
                     setting.responder.leave.GROUP.push(to)
                     setting.responder.leave.message[to] = "Sayonara @!"
-                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, `Success activated Auto Respon Leave *${g.subject}*`)
                 }
             } else if (cond[0].toLowerCase() == "off") {
@@ -1861,12 +1860,12 @@ event.on('message-new', async(chat) =>{
                 } else {
                     setting.responder.leave.status = false
                     setting.responder.leave.GROUP.splice(to)
-                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, "Success deactivated Auto Respon Leave *"+g.subject+"*")
                 }
             } else {
                 setting.responder.leave.message[to] = xtext
-                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                 wa.sendMessage(to, ' 「 Auto Respon 」\nAuto Respon Leave has been set to:\n_'+setting.responder.leave.message[to]+'_ \nTo: *'+g.subject+'*')
             }
             printLogs(msg)
@@ -1891,7 +1890,7 @@ event.on('message-new', async(chat) =>{
                 } else {
                     setting.responder.pm.status = true
                     setting.responder.pm.message = "Apaan tod"
-                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, `Success activated Responpm`)
                 }
             } else if (cond[0].toLowerCase() == "off") {
@@ -1899,12 +1898,12 @@ event.on('message-new', async(chat) =>{
                     wa.sendMessage(to, "Responpm already deactive")
                 } else {
                     setting.responder.pm.status = false
-                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, "Success deactivated Responpm")
                 }
             } else {
                 setting.responder.pm.message = xtext
-                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                 wa.sendMessage(to, ' 「 Auto Respon 」\nResponpm has been set to:\n_'+setting.responder.pm.message+'_')
             }
             printLogs(msg)
@@ -1927,7 +1926,7 @@ event.on('message-new', async(chat) =>{
                     wa.sendMessage(to, `Respongroupupdate already active`)
                 } else {
                     setting.responder.groupchange.status = true
-                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, `Success activated Respongroupupdate`)
                 }
             } else if (cond[0].toLowerCase() == "off") {
@@ -1935,7 +1934,7 @@ event.on('message-new', async(chat) =>{
                     wa.sendMessage(to, "Respongroupupdate already deactive")
                 } else {
                     setting.responder.groupchange.status = false
-                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, '\t'))
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, "Success deactivated Respongroupupdate")
                 }
             }
