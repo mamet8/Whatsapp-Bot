@@ -1760,7 +1760,7 @@ event.on('message-new', async(chat) =>{
             res += "\n├ Usage : "
             res += "\n│ • Respontag"
             res += "\n│ • Respontag <on/off>"
-            res += "\n│ • Respontag <message>"
+            res += "\n│ • Respontag Msg <message>"
             res += "\n╰───「 Hello World 」"
             if (cmd == "respontag") { 
                 wa.sendMessage(to, res)
@@ -1781,10 +1781,12 @@ event.on('message-new', async(chat) =>{
                     setting.responder.tag.status = false
                     setting.responder.tag.GROUP.splice(to)
                     fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
+                    respon_tag = {}
+                    fs.writeFileSync(respon_tag, JSON.stringify(respon_tag, null, 2))
                     wa.sendMessage(to, "Success deactivated Auto Respon Tag *"+g.subject+"*")
                 }
-            } else {
-                setting.responder.tag.message[to] = xtext
+            } else if (cond[0].toLowerCase() == "msg") {
+                setting.responder.tag.message[to] = cond[1]
                 fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                 wa.sendMessage(to, ' 「 Auto Respon 」\nAuto Respon Tag has been set to:\n_'+setting.responder.tag.message[to]+'_ \nTo: *'+g.subject+'*')
             }
@@ -1800,7 +1802,7 @@ event.on('message-new', async(chat) =>{
             res += "\n├ Usage : "
             res += "\n│ • Welcome"
             res += "\n│ • Welcome <on/off>"
-            res += "\n│ • Welcome <message>"
+            res += "\n│ • Welcome Msg <message>"
             res += "\n╰───「 Hello World 」"
             if (cmd == "welcome") { 
                 wa.sendMessage(to, res)
@@ -1823,8 +1825,8 @@ event.on('message-new', async(chat) =>{
                     fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, "Success deactivated Auto Respon Welcome *"+g.subject+"*")
                 }
-            } else {
-                setting.responder.welcome.message[to] = xtext
+            } else if (cond[0].toLowerCase() == "msg") {
+                setting.responder.welcome.message[to] = cond[1]
                 fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                 wa.sendMessage(to, ' 「 Auto Respon 」\nAuto Respon Welcome has been set to:\n_'+setting.responder.welcome.message[to]+'_ \nTo: *'+g.subject+'*')
             }
@@ -1840,7 +1842,7 @@ event.on('message-new', async(chat) =>{
             res += "\n├ Usage : "
             res += "\n│ • Leave"
             res += "\n│ • Leave <on/off>"
-            res += "\n│ • Leave <message>"
+            res += "\n│ • Leave Msg <message>"
             res += "\n╰───「 Hello World 」"
             if (cmd == "leave") { 
                 wa.sendMessage(to, res)
@@ -1863,8 +1865,8 @@ event.on('message-new', async(chat) =>{
                     fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, "Success deactivated Auto Respon Leave *"+g.subject+"*")
                 }
-            } else {
-                setting.responder.leave.message[to] = xtext
+            } else if (cond[0].toLowerCase() == "msg") {
+                setting.responder.leave.message[to] = cond[1]
                 fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                 wa.sendMessage(to, ' 「 Auto Respon 」\nAuto Respon Leave has been set to:\n_'+setting.responder.leave.message[to]+'_ \nTo: *'+g.subject+'*')
             }
@@ -1880,31 +1882,32 @@ event.on('message-new', async(chat) =>{
             res += "\n├ Usage : "
             res += "\n│ • Responpm"
             res += "\n│ • Responpm <on/off>"
-            res += "\n│ • Responpm <message>"
+            res += "\n│ • Responpm Msg <message>"
             res += "\n╰───「 Hello World 」"
             if (cmd == "responpm") { 
                 wa.sendMessage(to, res)
             } else if (cond[0].toLowerCase() == "on") {
                 if (setting.responder.pm.status == true){
-                    wa.sendMessage(to, `Responpm already active`)
+                    wa.sendMessage(to, `Success activated Responpm`)
                 } else {
                     setting.responder.pm.status = true
-                    setting.responder.pm.message = "Apaan tod"
                     fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, `Success activated Responpm`)
                 }
             } else if (cond[0].toLowerCase() == "off") {
                 if (setting.responder.pm.status == false){
-                    wa.sendMessage(to, "Responpm already deactive")
+                    wa.sendMessage(to, "Success deactivated Responpm")
                 } else {
                     setting.responder.pm.status = false
                     fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
+                    respon_pm = {}
+                    fs.writeFileSync(respon_pm, JSON.stringify(respon_pm, null, 2))
                     wa.sendMessage(to, "Success deactivated Responpm")
                 }
-            } else {
-                setting.responder.pm.message = xtext
+            } else if (cond[0].toLowerCase() == "msg") {
+                setting.responder.pm.message = cond[1]
                 fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
-                wa.sendMessage(to, ' 「 Auto Respon 」\nResponpm has been set to:\n_'+setting.responder.pm.message+'_')
+                wa.sendMessage(to, ' 「 Auto Respon 」\nmessage responpm change to:\n_'+setting.responder.pm.message+'_')
             }
             printLogs(msg)
 
