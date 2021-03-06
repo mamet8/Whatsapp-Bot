@@ -365,6 +365,8 @@ event.on('message-new', async(chat) =>{
             mat += '⤷ Respongroupupdate\n'
             mat += '⤷ Welcome\n'
             mat += '⤷ Leave\n'
+            mat += '⤷ Searhmsg <msg>\n'
+            mat += '⤷ Readallchat\n'
             mat += '\n'
             mat += '\n*Media:*\n'
             mat += '⤷ Ig\n'
@@ -637,6 +639,43 @@ event.on('message-new', async(chat) =>{
                 }
             }else{
                 wa.sendReply(to, "Bot Not Admin!")
+            }
+            printLogs(msg)
+        }else if (cmd.startsWith("searhmsg")){
+            if (owner.includes(sender)){
+                const xtext = cmd.replace('searhmsg' + " ", "")
+                cond = xtext.split(" ")
+                const a = await event.searchMessages(xtext, to, 10, 1)// count 10 
+                let fox = '「 Message Search 」\n\n'
+                num = 0
+                for (i of a.messages){
+                    num += 1
+                    if (i.message.conversation) {
+                        if (i.key.fromMe){ 
+                            fox += num+'. Sender: '+event.user.jid+'\n    Msg: '+i.message.conversation+'\n    MsgID: '+i.key.id+'\n    Type: conversation\n\n'
+                        }else{
+                            fox += num+'. Sender: '+i.key.participant+'\n    Msg: '+i.message.conversation+'\n    MsgID: '+i.key.id+'\n    Type: conversation\n\n'
+                        } 
+                    }
+                    else if (i.message.extendedTextMessage){
+                        if (i.key.fromMe){ 
+                            fox += num+'. Sender: '+event.user.jid+'\n    Msg: '+i.message.extendedTextMessage.text+'\n    MsgID: '+i.key.id+'\n    Type: extendedTextMessage\n\n'
+                        }else{
+                            fox += num+'. Sender: '+i.key.participant+'\n    Msg: '+i.message.extendedTextMessage.text+'\n    MsgID: '+i.key.id+'\n    Type: extendedTextMessage\n\n'
+                        } 
+                    }
+                }
+                wa.sendMessage(to, fox)
+            }
+            printLogs(msg)
+        }else if (cmd.startsWith("readallchat")){
+            if (owner.includes(sender)){
+                anu = await event.chats.all()
+                event.setMaxListeners(25)
+                for (let mat of anu) {
+                    event.chatRead(mat.jid)
+                }
+                wa.sendReply(to, "success read all message")
             }
             printLogs(msg)
 
