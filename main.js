@@ -255,14 +255,11 @@ event.on('message-new', async(chat) =>{
         if (msg.mentionedJid){
             if (msg.mentionedJid.includes(event.user.jid)){
                 if (event.user.jid.includes(sender)) return
-                if(respon_tag[sender]){
-                    if(respon_tag[sender] > 0){return}
-                    respon_tag[sender] += 1
-                }else{
-                    respon_tag[sender] = 1
+                if(!respon_tag[sender]){
+                    respon_tag[sender] = true
+                    wa.sendReply(to, setting.responder.tag.message[to], [sender])
                 }
-                wa.sendMessage(to, setting.responder.tag.message[to])
-            } 
+            }
         }
     }
     if (setting.responder.pm.status){
@@ -294,7 +291,7 @@ event.on('message-new', async(chat) =>{
                 wa.sendReplyWA(to, "Hey @!", "HujanAPI.xyz", [sender])
         }else if (cmd == "mode public"){
             if (owner.includes(sender)){
-                if (setting.Modepublic.status = true){
+                if (setting.Modepublic.status == true){
                     wa.sendReply(to, 'Mode Public already active')
                 } else {
                     setting.Modepublic.status = true
@@ -1770,7 +1767,7 @@ event.on('message-new', async(chat) =>{
                 } else {
                     setting.responder.tag.status = true
                     setting.responder.tag.GROUP.push(to)
-                    setting.responder.tag.message[to] = "ada apa?"
+                    setting.responder.tag.message[to] = "ada apa? @!"
                     fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                     wa.sendMessage(to, `Success activated Auto Respon Tag *${g.subject}*`)
                 }
