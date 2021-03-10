@@ -1986,35 +1986,59 @@ event.on('message-new', async(chat) =>{
             const data = await response.json()
             wa.sendMediaURL(to, data.result.result, "*RANDOM LOLI*")
             printLogs(msg)
-        } else if (cmd == "randomblowjob") {
-            if (!modecmd(sender)) return
-            const response = await requests("http://hujanapi.xyz/api/randomblowjob?apikey=" + APIKUY)
-            const data = await response.json()
-            wa.sendMediaURL(to, data.url, "*Your requests*")
-            printLogs(msg)
         } else if (cmd == "randomhentai") {
             if (!modecmd(sender)) return
             const response = await requests("http://hujanapi.xyz/api/randomhentai?apikey=" + APIKUY)
             const data = await response.json()
             wa.sendMediaURL(to, data.url, "*Your requests*")
             printLogs(msg)
+        } else if (cmd == "randomblowjob") {
+            if (!modecmd(sender)) return
+            const response = await requests("http://hujanapi.xyz/api/randomblowjob?apikey=" + APIKUY)
+            const data = await response.json()
+            await wa.downloadFile(data.url, "./randomblowjob.gif")
+            setTimeout(async ()=>{return await exec('ffmpeg -i randomblowjob.gif -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" ini.mp4 -y', (er) => {
+                fs.unlinkSync('./randomblowjob.gif')
+                if (er) console.log(er)
+                wa.sendGif(to, './ini.mp4')
+                fs.unlinkSync('./ini.mp4')
+            });},5000)
+            printLogs(msg)
         } else if (cmd == "randomkiss") {
             if (!modecmd(sender)) return
             const response = await requests("http://hujanapi.xyz/api/randomkiss?apikey=" + APIKUY)
             const data = await response.json()
-            wa.sendMediaURL(to, data.url, "*Your requests*")
+            await wa.downloadFile(data.url, "./randomkiss.gif")
+            setTimeout(async ()=>{return await exec('ffmpeg -i randomkiss.gif -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" ini.mp4 -y', (er) => {
+                fs.unlinkSync('./randomkiss.gif')
+                if (er) console.log(er)
+                wa.sendGif(to, './ini.mp4')
+                fs.unlinkSync('./ini.mp4')
+            });},5000)
             printLogs(msg)
         } else if (cmd == "randomhug") {
             if (!modecmd(sender)) return
             const response = await requests("http://hujanapi.xyz/api/randomhug?apikey=" + APIKUY)
             const data = await response.json()
-            wa.sendMediaURL(to, data.url, "*Your requests*")
+            await wa.downloadFile(data.url, "./randomhug.gif")
+            setTimeout(async ()=>{return await exec('ffmpeg -i randomhug.gif -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" ini.mp4 -y', (er) => {
+                fs.unlinkSync('./randomhug.gif')
+                if (er) console.log(er)
+                wa.sendGif(to, './ini.mp4')
+                fs.unlinkSync('./ini.mp4')
+            });},5000)
             printLogs(msg)
         } else if (cmd == "randomcry") {
             if (!modecmd(sender)) return
             const response = await requests("http://hujanapi.xyz/api/randomcry?apikey=" + APIKUY)
             const data = await response.json()
-            wa.sendMediaURL(to, data.url, "*Your requests*")
+            await wa.downloadFile(data.url, "./randomcry.gif")
+            setTimeout(async ()=>{return await exec('ffmpeg -i randomcry.gif -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" ini.mp4 -y', (er) => {
+                fs.unlinkSync('./randomcry.gif')
+                if (er) console.log(er)
+                wa.sendGif(to, './ini.mp4')
+                fs.unlinkSync('./ini.mp4')
+            });},5000)
             printLogs(msg)
         } else if (cmd == "randomanime") {
             if (!modecmd(sender)) return
