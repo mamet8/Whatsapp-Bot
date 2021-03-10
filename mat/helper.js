@@ -114,11 +114,12 @@ exports.sendPdf = function(to, filename, text="HujanAPI.pdf"){
     wa.sendMessage(to, bufer, MessageType.document, { mimetype: Mimetype.pdf, title: text})
 }
 
-//send GIF
-exports.sendGif = function(to, filename, text=""){
+//send GIF only use MP4, not work if you use gif
+exports.sendGif = function(to, filename){
     const bufer = fs.readFileSync(filename)
-    wa.sendMessage(to, bufer,MessageType.video, { mimetype: Mimetype.gif, caption: text })
+    wa.sendMessage(to, bufer,MessageType.video, { mimetype: Mimetype.gif, gifPlayback: true})
 }
+//send Sticker
 exports.sendSticker = function(to, filename){
     const bufer = fs.readFileSync(filename)
     wa.sendMessage(to, bufer, MessageType.sticker)
