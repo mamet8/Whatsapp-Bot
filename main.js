@@ -94,9 +94,123 @@ event.on('message-new', async(chat) =>{
         tmp_ids.push(msg_id)
     }
     if (msg.quoted){
+        const qType = Object.keys(msg.quoted)[0]
         if (!modecmd(sender)) return
-        if (cmd == "img2url"){
-            if (Object.keys(msg.quoted)[0] === "imageMessage"){
+        if (cmd == "to status"){
+            if (qType === "conversation" | qType === "extendedTextMessage"){
+                event.sendMessage("status@broadcast", text, "extendedTextMessage")
+                wa.sendMessage(to, "update status text succes")
+            }
+            printLogs(msg)
+        } else if (qType === "videoMessage"){
+            if (cmd.startsWith("upstatus")) {
+                const xtext = cmd.replace("upstatus ", "")
+                if(args.length === 1){
+                    msg.message = msg.quoted
+                    a = msg.message.videoMessage.seconds
+                    if (a > 30) return wa.sendReply(to, "duration exceeds 30 seconds")
+                    wa.sendReply(to, "Meluncur")
+                    b = await event.downloadMediaMessage(msg)
+                    event.sendMessage("status@broadcast", b, qType)
+                }else{
+                    msg.message = msg.quoted
+                    a = msg.message.videoMessage.seconds
+                    if (a > 30) return wa.sendReply(to, "duration exceeds 30 seconds")
+                    wa.sendReply(to, "Success Upload Status")
+                    b = await event.downloadMediaMessage(msg)
+                    event.sendMessage("status@broadcast", b, qType, {'caption': xtext})
+                }
+                printLogs(msg)
+            } else if (cmd == "sticker"){
+                msg.message = msg.quoted
+                const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
+                mat = wa.getRandom('.webp')
+                exec(`ffmpeg -i ${file} -ss 00:00:00 -t 00:00:15 ${mat}`, (err) => {
+                    fs.unlinkSync(file)
+                    if (err) return wa.sendMessage(to, 'Failed to convert video to sticker❌')
+                    buffer = fs.readFileSync(mat)
+                    wa.sendSticker(to, mat)
+                    fs.unlinkSync(mat)
+                })
+                printLogs(msg)
+            } else if (cmd.startsWith("sticker2")){
+                const xtext = txt.replace('sticker2' + " ", "")
+                cond = xtext.split("|")
+                if(args.length === 1){
+                    msg.message = msg.quoted
+                    const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
+                    mat = wa.getRandom('.webp')
+                    exof = await wa.addMetadata('BOT', "Mat")
+                    exec(`ffmpeg -i ${file} -ss 00:00:00 -t 00:00:15 ${mat}`, (err) => {
+                        fs.unlinkSync(file)
+                        if (err) return wa.sendMessage(to, 'Failed to convert image to sticker❌')
+                        exec(`webpmux -set exif ${exof} ${mat} -o ${mat}`, async (error) => {
+                            if (error) return console.log(error)
+                            wa.sendSticker(to, mat)
+                            fs.unlinkSync(mat)
+                        })
+                    })
+                }else{
+                    if (!cond.length === 2) return
+                    msg.message = msg.quoted
+                    const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
+                    mat = wa.getRandom('.webp')
+                    crot = wa.addMetadata(cond[0], cond[1])
+                    exec(`ffmpeg -i ${file} -ss 00:00:00 -t 00:00:15 ${mat}`, (err) => {
+                        fs.unlinkSync(file)
+                        if (err) return wa.sendMessage(to, 'Failed to convert image to sticker❌')
+                        exec(`webpmux -set exif ${crot} ${mat} -o ${mat}`, async (error) => {
+                            if (error) return console.log(error)
+                            wa.sendSticker(to, mat)
+                            fs.unlinkSync(mat)
+                        })
+                    })
+                }
+                printLogs(msg)
+            }
+        // Reply Image
+        } else if (qType === "imageMessage"){
+            if (cmd.startsWith("upstatus")) {
+                const xtext = cmd.replace("upstatus ", "")
+                if(args.length === 1){
+                    msg.message = msg.quoted
+                    b = await event.downloadMediaMessage(msg)
+                    event.sendMessage("status@broadcast", b, qType)
+                    wa.sendReply(to, "Success Upload Status")
+                }else{
+                    msg.message = msg.quoted
+                    b = await event.downloadMediaMessage(msg)
+                    event.sendMessage("status@broadcast", b, qType, {'caption': xtext})
+                    wa.sendReply(to, "Success Upload Status")
+                }
+                printLogs(msg)
+            } else if (cmd == "sticker2"){
+                msg.message = msg.quoted
+                const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
+                mat = wa.getRandom('.webp')
+                exec(`ffmpeg -i ${file} -vcodec libwebp -filter:v fps=fps=20 -lossless 1 -loop 0 -preset default -an -vsync 0 -s 512:512 ${mat}`, (err) => {
+                    fs.unlinkSync(file)
+                    if (err) return wa.sendMessage(to, 'Failed to convert image to sticker❌')
+                    exec(`webpmux -set exif ${wa.addMetadata('BOT', "Mat")} ${mat} -o ${mat}`, async (error) => {
+                        if (error) return console.log(error)
+                        wa.sendSticker(to, mat)
+                        fs.unlinkSync(mat)
+                    })
+                })
+                printLogs(msg)
+            } else if (cmd == "sticker"){
+                msg.message = msg.quoted
+                const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
+                mat = wa.getRandom('.webp')
+                exec(`ffmpeg -i ${file} -vcodec libwebp -filter:v fps=fps=20 -lossless 1 -loop 0 -preset default -an -vsync 0 -s 512:512 ${mat}`, (err) => {
+                    fs.unlinkSync(file)
+                    if (err) return wa.sendMessage(to, 'Failed to convert image to sticker❌')
+                    buffer = fs.readFileSync(mat)
+                    wa.sendSticker(to, mat)
+                    fs.unlinkSync(mat)
+                })
+                printLogs(msg)
+            } else if (cmd == "img2url"){
                 msg.message = msg.quoted
                 const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
                 const stream = fs.createReadStream(file);
@@ -106,40 +220,76 @@ event.on('message-new', async(chat) =>{
                 const ret =  await res.json()
                 wa.sendMessage(to, ret.result.url)
                 fs.unlinkSync(file)
-            }
-            printLogs(msg)
-        } else if (cmd == "setfakestatus"){
-            if (Object.keys(msg.quoted)[0] === "imageMessage"){
+                printLogs(msg)
+            } else if (cmd == "setfakestatus"){
                 msg.message = msg.quoted
                 await event.downloadAndSaveMediaMessage(msg, "./media/pictfakestatus")
                 setting.pictFakestatus = "./media/pictfakestatus.jpeg"
                 fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                 wa.sendReply(to, "succes")
-            }
-        } else if (cmd == "setfakethumb"){
-            if (Object.keys(msg.quoted)[0] === "imageMessage"){
+                printLogs(msg)
+            } else if (cmd == "setfakethumb"){
                 msg.message = msg.quoted
                 await event.downloadAndSaveMediaMessage(msg, "./media/pictfakethumb")
                 setting.pictFakethumb = "./media/pictfakestatus.jpeg"
                 fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                 wa.sendReply(to, "succes")
-            }
-        } else if (cmd == "setpictdeface"){
-            if (Object.keys(msg.quoted)[0] === "imageMessage"){
+                printLogs(msg)
+            } else if (cmd == "setpictdefeca"){
                 msg.message = msg.quoted
                 await event.downloadAndSaveMediaMessage(msg, "./media/pictfakestatus")
                 setting.pictDeface = "./media/pictdeface.jpeg"
                 fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
                 wa.sendReply(to, "succes")
+                printLogs(msg)
+            } else if (cmd == "set pictgroup") {
+                if (msg.isGroup){
+                    try{
+                        msg.message = msg.quoted
+                        const file = await event.downloadAndSaveMediaMessage(msg, "./media/"+msg_id)
+                        const img = fs.readFileSync(file)
+                        await event.updateProfilePicture(to, img)
+                        wa.sendReply(to, "Success Change Picture Group")
+                        fs.unlinkSync(file)
+                    } catch {wa.sendReplyWA(to, "Failed\nOnly Admin can settings group picture", "Change Group Picture")}
+                } else {wa.sendMessage(to, 'Only Group')}
+                printLogs(msg)
+            } else if (cmd == "set picture") {
+                msg.message = msg.quoted
+                const file = await event.downloadAndSaveMediaMessage(msg, "./media/"+msg_id)
+                const img = fs.readFileSync(file)
+                await event.updateProfilePicture(event.user.jid, img)
+                wa.sendReply(to, "Success Change Picture Profile")
+                fs.unlinkSync(file)
+                printLogs(msg)
+            } else if (cmd == "to hidetag"){
+                msg.message = msg.quoted
+                const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
+                wa.hideTagImage(to, file)
+                fs.unlinkSync(file)
+                printLogs(msg)
+            } else if (cmd.startsWith("addimg")) {
+                const xtext = cmd.replace("addimg ", "")
+                if (!imguy[xtext]){
+                    msg.message = msg.quoted
+                    const file = await event.downloadAndSaveMediaMessage(msg, "./media/tmp/"+xtext)
+                    imguy[xtext] = "./media/tmp/"+xtext+".jpeg"
+                    fs.writeFileSync('./mat/data/image.json', JSON.stringify(imguy, null, 2))
+                    wa.sendReply(to, "success save image "+ xtext)
+                } else {
+                    wa.sendReply(to, "*"+xtext+"* already in key _image_")
+                }
+                printLogs(msg)
             }
+        // Batas Reply Image
         } else if (cmd == "to sscode"){
             if (Object.keys(msg.quoted)[0] === "conversation"){
                 xtext = msg.quoted.conversation
                 const code = await requests('http://hujanapi.xyz/api/sscode?query='+xtext+'&apikey='+APIKUY)
                 const mat = await code.json()
                 wa.sendMediaURL(to,mat.result)
+                printLogs(msg)
             }
-            printLogs(msg)
         } else if (cmd == "totext"){
             if (Object.keys(msg.quoted)[0] === "audioMessage") {
                 msg.message = msg.quoted
@@ -151,10 +301,32 @@ event.on('message-new', async(chat) =>{
                 const ret =  await res.json()
                 wa.sendMessage(to, ret.result)
                 fs.unlinkSync(file)
+                printLogs(msg)
             }
-            printLogs(msg)
+        } else if (Object.keys(msg.quoted)[0] === "audioMessage"){
+            if (cmd.startsWith("addvoice")) {
+                const xtext = cmd.replace("addvoice ", "")
+                if (!voiceuy[xtext]){
+                    voiceuy[xtext] = msg.quoted.audioMessage
+                    fs.writeFileSync('./mat/data/voice.json', JSON.stringify(voiceuy, null, 2))
+                    wa.sendReply(to, "success save voice "+ xtext)
+                } else {
+                    wa.sendReply(to, "*"+xtext+"* already in key _voice_")
+                }
+                printLogs(msg)
+            }
         } else if (Object.keys(msg.quoted)[0] === "stickerMessage"){
-            if (cmd == "toimg") {
+            if (cmd.startsWith("addsticker")) {
+                const xtext = cmd.replace("addsticker ", "")
+                if (!stickuy[xtext]){
+                    stickuy[xtext] = msg.quoted.stickerMessage
+                    fs.writeFileSync('./mat/data/sticker.json', JSON.stringify(stickuy, null, 2))
+                    wa.sendReply(to, "success save sticker "+ xtext)
+                } else {
+                    wa.sendReply(to, "*"+xtext+"* already in key _sticker_")
+                }
+                printLogs(msg)
+            }else if (cmd == "toimg") {
                 msg.message = msg.quoted
                 gerak = msg.quoted.stickerMessage.firstFrameSidecar
                 const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
@@ -165,6 +337,16 @@ event.on('message-new', async(chat) =>{
                     buffer = fs.readFileSync(mat)
                     wa.sendImage(to, mat)
                     fs.unlinkSync(mat)
+                })
+                printLogs(msg)
+            }else if (cmd == "takesticker") {
+                msg.message = msg.quoted
+                gerak = msg.quoted.stickerMessage.firstFrameSidecar
+                const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
+                exec(`webpmux -set exif ${wa.addMetadata('BOT', "Mat")} ${file} -o ${file}`, async (error) => {
+                    if (error) return console.log(error)
+                    wa.sendSticker(to, file)
+                    fs.unlinkSync(file)
                 })
                 printLogs(msg)
             } else if (cmd == "tomp4") {
@@ -178,6 +360,21 @@ event.on('message-new', async(chat) =>{
                 wa.sendMediaURL(to, ret.result)
                 fs.unlinkSync(file)
                 printLogs(msg)
+            } else if (cmd == "togif") {
+                msg.message = msg.quoted
+                const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
+                const stream = fs.createReadStream(file);
+                const form = new FormData();
+                form.append('webp', stream);
+                const res = await requests('http://hujanapi.xyz/api/webp2mp4?apikey='+APIKUY, { method: 'POST', body: form })
+                const ret =  await res.json()
+                wa.downloadFile(ret.result, "./media/output.mp4")
+                setTimeout(async ()=>{
+                    fs.unlinkSync(file)
+                    wa.sendGif(to, "./media/output.mp4")
+                    fs.unlinkSync("./media/output.mp4")
+                },5000)
+                printLogs(msg)
             } else if (cmd == "to hidetag"){
                 msg.message = msg.quoted
                 const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
@@ -185,39 +382,6 @@ event.on('message-new', async(chat) =>{
                 fs.unlinkSync(file)
                 printLogs(msg)
             }
-        } else if (cmd == "sticker"){
-            if (Object.keys(msg.quoted)[0] === "imageMessage") {
-                msg.message = msg.quoted
-                const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
-                mat = wa.getRandom('.webp')
-                exec(`ffmpeg -i ${file} -vcodec libwebp -filter:v fps=fps=20 -lossless 1 -loop 0 -preset default -an -vsync 0 -s 512:512 ${mat}`, (err) => {
-                    fs.unlinkSync(file)
-                    if (err) return wa.sendMessage(to, 'Failed to convert image to sticker❌')
-                    buffer = fs.readFileSync(mat)
-                    wa.sendSticker(to, mat)
-                    fs.unlinkSync(mat)
-                })
-            } else if (Object.keys(msg.quoted)[0] === "videoMessage") {
-                msg.message = msg.quoted
-                const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
-                mat = wa.getRandom('.webp')
-                exec(`ffmpeg -i ${file} -ss 00:00:00 -t 00:00:15 ${mat}`, (err) => {
-                    fs.unlinkSync(file)
-                    if (err) return wa.sendMessage(to, 'Failed to convert video to sticker❌')
-                    buffer = fs.readFileSync(mat)
-                    wa.sendSticker(to, mat)
-                    fs.unlinkSync(mat)
-                })
-            }
-            printLogs(msg)
-        } else if (cmd == "to hidetag"){
-            if (Object.keys(msg.quoted)[0] === "imageMessage") {
-                msg.message = msg.quoted
-                const file = await event.downloadAndSaveMediaMessage(msg, msg_id)
-                wa.hideTagImage(to, file)
-                fs.unlinkSync(file)
-            }
-            printLogs(msg)
         } else if (cmd == "delete"){
             idx = msg.message.extendedTextMessage.contextInfo.stanzaId
             if (tmp_ids.includes(idx)) {
@@ -226,29 +390,6 @@ event.on('message-new', async(chat) =>{
                 wa.sendMessage(to, "Error❌, Bot Cannot Unsend message other people!")
             }
             printLogs(msg)
-        } else if (Object.keys(msg.quoted)[0] === "imageMessage"){
-            if (cmd == "set pictgroup") {
-                if (msg.isGroup){
-                    try{
-                        msg.message = msg.quoted
-                        const file = await event.downloadAndSaveMediaMessage(msg, "./media/"+msg_id)
-                        console.log(file)
-                        const img = fs.readFileSync(file)
-                        await event.updateProfilePicture(to, img)
-                        wa.sendReply(to, "Success Change Picture Group")
-                        fs.unlinkSync(file)
-                    } catch {wa.sendReplyWA(to, "Failed\nOnly Admin can settings group picture", "Change Group Picture")}
-                } else {wa.sendMessage(to, 'Only Group')}
-                printLogs(msg)
-            } else if (cmd == "set profile") {
-                msg.message = msg.quoted
-                const file = await event.downloadAndSaveMediaMessage(msg, "./media/"+msg_id)
-                const img = fs.readFileSync(file)
-                await event.updateProfilePicture(event.user.jid, img)
-                wa.sendReply(to, "Success Change Picture Profile")
-                fs.unlinkSync(file)
-                printLogs(msg)
-            }
         }
     }
     if (setting.responder.tag.status){
