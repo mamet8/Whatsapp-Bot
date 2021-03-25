@@ -21,11 +21,19 @@ const event = conn.Whatsapp
 const setting = JSON.parse(fs.readFileSync('./settings.json'))
 
 const APIKUY = "Chat me for Apikey https://wa.me/6281396061030"
+var blocked = []
 var tmp_ids = []
 var tmp_hit = []
 var respon_tag = {}
 var respon_pm = {}
 
+function cih(s) {
+    var hours = Math.floor(s / (60 * 60))
+    var minutes = Math.floor(s % (60 * 60) / 60);
+    var seconds = Math.floor(s % 60);
+    if (hours === 0) return `Bot active from *${minutes}* _min_, *${seconds}* _sec_,`
+    return `Bot active from *${hours}* _hour_, *${minutes}* _min_, *${seconds}* _sec_,`
+}
 function modecmd(sender){
     if(setting.Modepublic.status){
         return true
@@ -460,6 +468,12 @@ event.on('message-new', async(chat) =>{
             if (!modecmd(sender)) return
             wa.sendContact(to, "6281396061030@s.whatsapp.net", "Owner")
             printLogs(msg)
+        } else if (cmd === "runtime"){
+            if (!modecmd(sender)) return
+            runtime = process.uptime()
+            a = cih(runtime)
+            wa.sendReply(to, a)
+            printLogs(msg)
         } else if (cmd === "settings"){
             if (!modecmd(sender)) return
             let mat = "*Settings*\n"
@@ -487,6 +501,7 @@ event.on('message-new', async(chat) =>{
             mat += '⤷ Owner\n'
             mat += '⤷ Me\n'
             mat += '⤷ Speed\n'
+            mat += '⤷ Runtime\n'
             mat += '⤷ Settings\n'
             mat += '⤷ Grouplist\n'
             mat += '⤷ Tagall\n'
