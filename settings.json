@@ -8,6 +8,9 @@
 	"gAutoRead": {
 		"status": false
 	},
+	"callblock": {
+		"status": false
+	},
 	"responder": {
 		"tag": {
 			"status": false,
