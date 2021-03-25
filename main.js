@@ -782,6 +782,49 @@ event.on('message-new', async(chat) =>{
                 wa.sendReply(to, "Bot Not Admin!")
             }
             printLogs(msg)
+        } else if (cmd.startsWith("block")) {
+            if (!modecmd(sender)) return
+            if(args.length === 1) return
+            user = m.message.extendedTextMessage.contextInfo.mentionedJid
+            console.log(user)
+            let no = 0
+            let fox = "*Blocked*\n"
+            for (let i of user){
+                no += 1
+                fox += "\n" + no + ". @!"
+                await event.blockUser(i, "add")
+            }
+            fox += "\n\nSucces Blocked: "+user.length+" User"
+            wa.sendReplyWA(to, fox, "HujanAPI.xyz", user)
+            printLogs(msg)
+        } else if (cmd.startsWith("unblock")) {
+            if (!modecmd(sender)) return
+            if(args.length === 1) return
+            user = m.message.extendedTextMessage.contextInfo.mentionedJid
+            console.log(user)
+            let no = 0
+            let fox = "*Unblocked*\n"
+            for (let i of user){
+                no += 1
+                fox += "\n" + no + ". @!"
+                await event.blockUser(i, "remove")
+            }
+            fox += "\n\nSucces Blocked: "+user.length+" User"
+            wa.sendReplyWA(to, fox, "HujanAPI.xyz", user)
+            printLogs(msg)
+        } else if (cmd == "listblock") {
+            if (!modecmd(sender)) return
+            let mids = []
+            let fox = "*Block List*\n"
+            let no = 0
+            for (let mem of blocked) {
+                no += 1
+                fox += "\n" + no + ". @!"
+                mids.push(mem)
+            }
+            fox += "\n\nTotal: "+mids.length+"\n\n𝗦𝗘𝗟𝗙𝗕𝗢𝗧-𝗪𝗔"
+            wa.sendReplyWA(to, fox, "HujanAPI.xyz", mids)
+            printLogs(msg)
         }else if (cmd.startsWith("searhmsg")){
             if (owner.includes(sender)){
                 const xtext = cmd.replace('searhmsg' + " ", "")
@@ -1925,7 +1968,38 @@ event.on('message-new', async(chat) =>{
                 }
             }
             printLogs(msg)
-
+        } else if (cmd.startsWith("callblock")) {
+            if (!modecmd(sender)) return
+            var sep = text.split(' ')
+            const xtext = text.replace(sep[0] + " ", "")
+            textt = xtext.toLowerCase()
+            let res = "╭───「 Called block 」"
+            res += "\n├ Status : "
+            res += "\n│ • Status : " +setting.callblock.status
+            res += "\n├ Usage : "
+            res += "\n│ • Callblock"
+            res += "\n│ • Callblock <on/off>"
+            res += "\n╰───「 Hello World 」"
+            if (cmd == "autoread") { 
+                wa.sendMessage(to, res)
+            } else if (textt == "on") {
+                if (setting.callblock.status == true){
+                    wa.sendMessage(to, "Called Block already active")
+                } else {
+                    setting.callblock.status = true
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
+                    wa.sendMessage(to, "Success activated Called Block")
+                }
+            } else if (textt == "off") {
+                if (setting.callblock.status == false){
+                    wa.sendMessage(to, "Called Block already deactive")
+                } else {
+                    setting.callblock.status = false
+                    fs.writeFileSync('./settings.json', JSON.stringify(setting, null, 2))
+                    wa.sendMessage(to, "Success deactivated Called Block")
+                }
+            }
+            printLogs(msg)
         } else if (cmd.startsWith("respontag")) {
             if (!msg.isGroup) return wa.sendMessage(to, 'Only Group')
             if (!modecmd(sender)) return
@@ -2240,5 +2314,29 @@ event.on('group-participants-update', async (chat) => {
         }
     } catch (e) {
         console.log('Error : '+ clc.red(e))
+    }
+})
+
+event.on('CB:action,,call', async json => {
+    const callerId = json[2][0][1].from;
+    if (setting.callblock.status){
+        wa.sendMessage(callerId, "Maaf anda di block karena menelpon nomor bot")
+        await event.blockUser(callerId, "add") // Block user
+        //console.log(callerId);
+    }
+});
+
+event.on('blocklist-update', async (chat) => {
+    // ADD BLOCK
+    for (i of chat.added){
+        target = i.replace('@c.us', '@s.whatsapp.net')
+        blocked.push(target)
+        console.log("[ BLOCK ]"+target)
+    }
+    // REMOVE BLOCK
+    for (i of chat.removed){
+        target = i.replace('@c.us', '@s.whatsapp.net')
+        blocked.splice(target, 1)
+        console.log("[ UNBLOCK ]"+target)
     }
 })
