@@ -862,6 +862,65 @@ event.on('message-new', async(chat) =>{
                 wa.sendReply(to, "success read all message")
             }
             printLogs(msg)
+            
+        } else if (cmd.startsWith("liststicker")) {
+            if (!modecmd(sender)) return
+            let tx = "╭───「 List Sticker 」"
+            let no = 0
+            for (i in stickuy){
+                no += 1
+                tx += `\n│ ${no}. ${i}`
+            }
+            tx += "\n╰───「 Hello World 」"
+            wa.sendMessage(to, tx)
+            printLogs(msg)
+        } else if (cmd.startsWith("delsticker")) {
+            if (!modecmd(sender)) return
+            const xtext = cmd.replace("delsticker ", "")
+            if (!stickuy[xtext]) return wa.sendMessage(to, `*${xtext}* not in key sticker`)
+            delete stickuy[xtext]
+            fs.writeFileSync('./mat/data/sticker.json', JSON.stringify(stickuy, null, 2))
+            wa.sendReply(to, "*"+xtext+"* Sticker Key deleted")
+            printLogs(msg)
+        } else if (cmd.startsWith("listimg")) {
+            if (!modecmd(sender)) return
+            let tx = "╭───「 List Image 」"
+            let no = 0
+            for (i in imguy){
+                no += 1
+                tx += `\n│ ${no}. ${i}`
+            }
+            tx += "\n╰───「 Hello World 」"
+            wa.sendMessage(to, tx)
+            printLogs(msg)
+        } else if (cmd.startsWith("delimg")) {
+            if (!modecmd(sender)) return
+            const xtext = cmd.replace("delimg ", "")
+            if (!imguy[xtext]) return wa.sendMessage(to, `*${xtext}* not in key image`)
+            fs.unlinkSync(imguy[xtext])
+            delete imguy[xtext]
+            fs.writeFileSync('./mat/data/image.json', JSON.stringify(imguy, null, 2))
+            wa.sendReply(to, "*"+xtext+"* Sticker Key deleted")
+            printLogs(msg)
+        } else if (cmd.startsWith("listvoice")) {
+            if (!modecmd(sender)) return
+            let tx = "╭───「 List Voice 」"
+            let no = 0
+            for (i in voiceuy){
+                no += 1
+                tx += `\n│ ${no}. ${i}`
+            }
+            tx += "\n╰───「 Hello World 」"
+            wa.sendMessage(to, tx)
+            printLogs(msg)
+        } else if (cmd.startsWith("delvoice")) {
+            if (!modecmd(sender)) return
+            const xtext = cmd.replace("delvoice ", "")
+            if (!voiceuy[xtext]) return wa.sendMessage(to, `*${xtext}* not in key voice`)
+            delete voiceuy[xtext]
+            fs.writeFileSync('./mat/data/voice.json', JSON.stringify(voiceuy, null, 2))
+            wa.sendReply(to, "*"+xtext+"* Voice Key deleted")
+            printLogs(msg)
 
 //============[ Media ]============\\
         } else if (cmd.startsWith("quranlist")) {
