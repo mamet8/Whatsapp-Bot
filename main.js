@@ -498,8 +498,14 @@ event.on('message-new', async(chat) =>{
             mat += '⤷ Setgroupname <text>\n'
             mat += '⤷ Fakereply <msg you>|<msg target>|<@>\n'
             mat += '⤷ Hidetag\n'
+            mat += '⤷ Joingc <link gc>\n'
             mat += '⤷ Getpict <@>\n'
             mat += '⤷ Getbio <@>\n'
+            mat += '⤷ Kick <@>\n'
+            mat += '⤷ Demote <@>\n'
+            mat += '⤷ Promote <@>\n'
+            mat += '⤷ Block <@>\n'
+            mat += '⤷ Unblock <@>\n'
             mat += '⤷ Autoread\n'
             mat += '⤷ Respontag\n'
             mat += '⤷ Responpm\n'
@@ -508,6 +514,7 @@ event.on('message-new', async(chat) =>{
             mat += '⤷ Leave\n'
             mat += '⤷ Searhmsg <msg>\n'
             mat += '⤷ Readallchat\n'
+            mat += '⤷ Callblock\n'
             mat += '\n'
             mat += '\n*Media:*\n'
             mat += '⤷ Ig\n'
@@ -656,6 +663,17 @@ event.on('message-new', async(chat) =>{
             if (!modecmd(sender)) return
             const code = await wa.getGroupInvitationCode(to)
             wa.sendMessage(to, code)
+            printLogs(msg)
+        } else if (cmd.startsWith("joingc")){
+            if (!modecmd(sender)) return
+            try {
+                const xtext = text.replace('joingc' + " ", "")
+                mat = xtext.replace('https://chat.whatsapp.com/','')
+                await event.acceptInvite(mat)
+                wa.sendReply(to, "Success Join to Group")
+            } catch {
+                wa.sendReply(to, "Link Group Error")
+            }
             printLogs(msg)
         } else if (cmd.startsWith("setgroupdesc")){
             if (!modecmd(sender)) return
