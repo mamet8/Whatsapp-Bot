@@ -11,7 +11,7 @@
   "author": "Mat",
   "license": "ISC",
   "dependencies": {
-    "@adiwajshing/baileys": "^3.4.1",
+    "@adiwajshing/baileys": "^3.5.0",
     "fluent-ffmpeg": "^2.1.2",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.33",
