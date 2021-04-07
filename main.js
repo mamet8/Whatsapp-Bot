@@ -56,7 +56,11 @@ async function printLogs(msg){
     const args = cmd.split(' ')
     tmp_hit.push(cmd)
     if(!msg.isGroup){
-        console.log(clc.green("[ CMD ] "), clc.yellow(time), clc.green(text), 'form', clc.green(event.contacts[sender].notify));
+        try {
+            console.log(clc.green("[ CMD ] "), clc.yellow(time), clc.green(text), 'form', clc.green(event.contacts[sender].notify));
+        } catch (e) {
+            console.log('Error :', e)
+        }
     } else {
         const gc = await wa.getGroup(to)
         console.log(clc.green("[ CMD ] "), clc.yellow(time), clc.green(text), 'form', clc.green(event.contacts[sender].notify), 'To', clc.yellow(gc.subject));
