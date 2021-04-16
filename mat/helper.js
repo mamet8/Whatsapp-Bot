@@ -44,8 +44,15 @@ exports.getRandom = (ext) => {
     
 exports.serialize = function(chat){
     m = JSON.parse(JSON.stringify(chat))
-    content = m.message
     //.text = m.message.conversation 
+    if (m.message["ephemeralMessage"]){
+        m.message = m.message.ephemeralMessage.message
+        m.ephemeralMessage = true
+        
+    }else{
+      m.ephemeralMessage = false
+    }
+    content = m.message
     m.isGroup = m.key.remoteJid.endsWith('@g.us')
     try{
         const berak = Object.keys(content)[0]
@@ -55,7 +62,11 @@ exports.serialize = function(chat){
     }
     try{
         const context = m.message.extendedTextMessage.contextInfo.quotedMessage
-        m.quoted = context
+        if(context["ephemeralMessage"]){
+            m.quoted = context.ephemeralMessage.message
+        }else{
+            m.quoted = context
+        }
     }catch{
         m.quoted = null
     }
@@ -75,6 +86,7 @@ exports.serialize = function(chat){
     if (m.key.fromMe){
         m.sender = wa.user.jid
     }
+    
     txt = (m.type === 'conversation' && m.message.conversation) ? m.message.conversation : (m.type == 'imageMessage') && m.message.imageMessage.caption ? m.message.imageMessage.caption : (m.type == 'documentMessage') && m.message.documentMessage.caption ? m.message.documentMessage.caption : (m.type == 'videoMessage') && m.message.videoMessage.caption ? m.message.videoMessage.caption : (m.type == 'extendedTextMessage') && m.message.extendedTextMessage.text ? m.message.extendedTextMessage.text : ""
     m.text = txt
     return m
