@@ -67,10 +67,10 @@ async function printLogs(msg){
     }
 }
 
-event.on('chat-update', async(chat) =>{
+event.on('chat-update', async(msg) =>{
     if (!msg.hasNewMessage) return;
     const owner = ["6282260888474@s.whatsapp.net","6281396061030@s.whatsapp.net", event.user.jid]
-    const msg = wa.serialize(chat)
+    msg = wa.serialize(msg)
     const text = msg.text
     const cmd = text.toLowerCase()
     const sender = msg.sender
@@ -426,7 +426,7 @@ event.on('chat-update', async(chat) =>{
             }
         }
     }
-    if (chat){
+    if (msg){
         //console.log(chat)
         if (cmd.startsWith("!")) {
             if (owner.includes(sender)){
