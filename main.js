@@ -68,6 +68,7 @@ async function printLogs(msg){
 }
 
 event.on('chat-update', async(chat) =>{
+    if (!msg.hasNewMessage) return;
     const owner = ["6282260888474@s.whatsapp.net","6281396061030@s.whatsapp.net", event.user.jid]
     const msg = wa.serialize(chat)
     const text = msg.text
