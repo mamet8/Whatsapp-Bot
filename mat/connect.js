@@ -29,13 +29,9 @@ exports.connectToWhatsApp =  async() =>{
   console.log('PLEASE SCAN the QR CODE')
   });
     
-  conn.on('credentials-updated', () => {
-  console.log(`credentials updated!`)
-  const authInfo = conn.base64EncodedAuthInfo() 
-  fs.writeFileSync('session.json', JSON.stringify(authInfo, null, '\t')) 
-   })
   fs.existsSync('./session.json') && conn.loadAuthInfo('./session.json')
   await conn.connect()
+  fs.writeFileSync('./session.json', JSON.stringify(conn.base64EncodedAuthInfo(), null, '\t'))
   console.log(' ====================================================')
   console.log("│ +  WA Version: "+conn.user.phone.wa_version)
   console.log("│ +  OS Version: "+conn.user.phone.os_version)
