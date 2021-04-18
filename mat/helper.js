@@ -43,8 +43,7 @@ exports.getRandom = (ext) => {
 }
     
 exports.serialize = function(chat){
-    m = JSON.parse(JSON.stringify(chat))
-    //.text = m.message.conversation 
+    m = JSON.parse(JSON.stringify(chat)).messages[0]
     if (m.message["ephemeralMessage"]){
         m.message = m.message.ephemeralMessage.message
         m.ephemeralMessage = true
