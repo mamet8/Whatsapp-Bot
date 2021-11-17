@@ -44,13 +44,42 @@ exports.getRandom = (ext) => {
     
 exports.serialize = function(chat){
     m = JSON.parse(JSON.stringify(chat)).messages[0]
-    if (m.message["ephemeralMessage"]){
+    //console.log(JSON.stringify(m, null, 4))
+
+    /*if (m.message["ephemeralMessage"]){
         m.message = m.message.ephemeralMessage.message
         m.ephemeralMessage = true
         
     }else{
       m.ephemeralMessage = false
+    }*/
+
+    if (m.type === 'ephemeralMessage') {
+        m.message = m.message.ephemeralMessage.message;
+        const tipe = Object.keys(m.message)[0];
+
+        if (tipe === 'viewOnceMessage') {
+            m.message = m.message.viewOnceMessage.message;
+            try {
+                const tipe = Object.keys(m.message)[0];
+                m.type = tipe;
+            } catch {
+                m.type = null;
+            }
+        }
+
+        try {
+            const tipe = Object.keys(m.message)[0];
+            m.type = tipe;
+        } catch {
+            m.type = null;
+        }
+
+        m.isEphemeral = true;
+    } else {
+        m.isEphemeral = false;
     }
+
     content = m.message
     m.isGroup = m.key.remoteJid.endsWith('@g.us')
     try{
