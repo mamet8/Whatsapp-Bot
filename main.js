@@ -433,10 +433,16 @@ event.on('chat-update', async(msg) =>{
                 const sep = text.split("\n")
                 let exc = text.replace(sep[0]+"\n", "")
                 const print = function(text){
-                    wa.sendMessage(to, util.format(text))
+                    a = JSON.stringify(text, null, 2)
+                    wa.sendMessage(to, util.format(JSON.parse(a)))
+                    //wa.sendMessage(to, a)
+                }
+                const j4p = function(tx){
+                    wa.sendMessage(to, JSON.stringify(tx, null, 4))
                 }
                 console.log(exc)
                 eval("(async () => {try{"+exc+"}catch(e){wa.sendMessage(to,  e.toString())}})()")
+                printLogs(msg)
             }
         }
         if (cmd === "hi"){
