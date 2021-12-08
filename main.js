@@ -20,7 +20,7 @@ const event = conn.Whatsapp
 
 const setting = JSON.parse(fs.readFileSync('./settings.json'))
 
-const APIKUY = "Chat me for Apikey https://wa.me/6281396061030"
+const APIKUY = "Register di http://hujanapi.xyz"
 var blocked = []
 var tmp_ids = []
 var tmp_hit = []
